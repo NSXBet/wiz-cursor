@@ -21,9 +21,6 @@ You are executing milestones automatically with intelligent human-input detectio
 
 - `[slug]` (optional): PRD slug. If not provided, uses current PRD from `.wiz/.current-prd`
 
-## Output Style
-
-This command automatically uses the **wiz-execution** output style for concise, action-oriented implementation. The style will be set automatically when the command executes.
 
 ## Command Overview
 
@@ -887,13 +884,6 @@ if [[ -f "$RESUME_STATE_FILE" ]]; then
 fi
 ```
 
-### Step 3: Set Output Style
-
-```bash
-# Switch to wiz-execution output style for concise, action-oriented implementation
-# Note: In Cursor, output style may be set differently or may not be applicable
-# This step is informational - adapt to Cursor's output style mechanism if needed
-```
 
 ### Step 4: Main Execution Loop
 

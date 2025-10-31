@@ -11,9 +11,9 @@ You are breaking down a comprehensive PRD into implementation phases using the W
 
 - `<slug>`: PRD slug (must exist at `.wiz/<slug>/prd.md`)
 
-## Output Style
+## Planning Agent
 
-This command automatically uses the **wiz-planning** output style for verbose, research-focused phase breakdown. The style will be set automatically when the command executes.
+This command delegates content generation to the **wiz-planner** agent (`.cursor/agents/wiz-planner.md`), which provides verbose, research-focused planning output suitable for strategic phase decomposition.
 
 ## Command Overview
 
@@ -490,15 +490,9 @@ wiz_ensure_dir "$PHASES_DIR"
 wiz_log_info "Created phases directory at $PHASES_DIR"
 ```
 
-### Step 3: Set Output Style
+### Step 3: Invoke wiz-planner Agent
 
-```bash
-# Switch to wiz-planning output style for verbose, research-focused planning
-# Note: In Cursor, output style may be set differently or may not be applicable
-# This step is informational - adapt to Cursor's output style mechanism if needed
-```
-
-This ensures the `wiz-planner` agent uses appropriate verbosity for strategic phase decomposition.
+The `wiz-planner` agent provides verbose, research-focused planning output suitable for strategic phase decomposition. When you reference `.cursor/agents/wiz-planner.md` in the next step, it will automatically provide comprehensive, detailed phase planning content.
 
 ### Step 4: Delegate to wiz-planner Agent
 

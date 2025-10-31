@@ -12,9 +12,6 @@ You are executing the next TODO milestone(s) using the Wiz Planner workflow.
 - `[slug]` (optional): PRD slug. If not provided, uses current PRD from `.wiz/.current-prd`
 - `[count]` (optional): Number of milestones to complete. Default: 1. Example: `/wiz-next 4` completes the next 4 milestones sequentially
 
-## Output Style
-
-This command automatically uses the **wiz-execution** output style for concise, action-oriented implementation. The style will be set automatically when the command executes.
 
 ## Command Overview
 
@@ -878,16 +875,6 @@ NEXT_PHASE_FILE=$(echo "$NEXT_MILESTONE_JSON" | jq -r '.phase_file')
 
 wiz_log_info "Found next milestone: $MILESTONE_ID in phase $NEXT_PHASE_NUM"
 ```
-
-### Step 5: Set Output Style
-
-```bash
-# Switch to wiz-execution output style for concise, action-oriented implementation
-# Note: In Cursor, output style may be set differently or may not be applicable
-# This step is informational - adapt to Cursor's output style mechanism if needed
-```
-
-This ensures concise, results-focused output for tactical implementation by the command.
 
 ### Step 6: Load Execution Context
 

@@ -24,9 +24,9 @@ You are creating a comprehensive Product Requirements Document (PRD) using the W
 - `<slug>`: Unique identifier for this PRD (lowercase, hyphens, alphanumeric only)
 - `"<idea>"`: Brief description of the feature or project idea (in quotes)
 
-## Output Style
+## Planning Agent
 
-This command automatically uses the **wiz-planning** output style for verbose, research-focused planning. The style will be set automatically when the command executes.
+This command delegates content generation to the **wiz-planner** agent (`.cursor/agents/wiz-planner.md`), which provides verbose, research-focused planning output suitable for strategic planning activities.
 
 ## Workflow Overview
 
@@ -573,15 +573,9 @@ wiz_ensure_dir "$INTAKE_DIR"
 wiz_log_info "Created directory structure at $PRD_DIR"
 ```
 
-### Step 3: Set Output Style
+### Step 3: Invoke wiz-planner Agent
 
-```bash
-# Switch to wiz-planning output style for verbose, research-focused planning
-# Note: In Cursor, output style may be set differently or may not be applicable
-# This step is informational - adapt to Cursor's output style mechanism if needed
-```
-
-This ensures the `wiz-planner` agent uses appropriate verbosity for strategic planning activities.
+The `wiz-planner` agent provides verbose, research-focused planning output suitable for strategic planning activities. When you reference `.cursor/agents/wiz-planner.md` in the next step, it will automatically provide comprehensive, detailed planning content.
 
 ### Step 4: Delegate to wiz-planner Agent
 
