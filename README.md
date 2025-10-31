@@ -59,11 +59,13 @@ The install script automatically tries multiple installation methods:
 
 The script will:
 - Try multiple URLs and methods automatically
-- Download the `.cursor` directory from the repository
-- Place it in your current directory
-- Prompt before overwriting if `.cursor` already exists
+- Download only the Wiz files (`.cursor/agents/` and `.cursor/commands/`)
+- Preserve any existing `.cursor` configuration you have
+- **Auto-update** if Wiz is already installed (no confirmation needed!)
 - Clean up temporary files automatically
 - Provide helpful error messages if all methods fail
+
+> 💡 **Smart Update**: Run the same command to update Wiz to the latest version - it detects existing installations and updates automatically!
 
 #### Option 2: Alternative Manual Installation
 
@@ -77,6 +79,20 @@ cd wiz-cursor
 # Copy .cursor to your project
 cp -r .cursor /path/to/your/project/
 ```
+
+### Updating Wiz
+
+To update Wiz to the latest version, simply run the installation command again:
+
+```bash
+# Using GitHub CLI
+gh api "repos/NSXBet/wiz-cursor/contents/install.sh?ref=main" --jq '.content' | base64 -d | bash
+
+# Or using curl
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/main/install.sh | bash
+```
+
+The script automatically detects existing installations and updates them without asking for confirmation.
 
 ### Your First Project
 
