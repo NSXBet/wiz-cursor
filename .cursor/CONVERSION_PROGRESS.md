@@ -18,12 +18,12 @@
 - [x] wiz-prd ✓
 - [x] wiz-phases ✓
 - [x] wiz-milestones ✓
-- [ ] wiz-status
-- [ ] wiz-resume
-- [ ] wiz-review-phase
-- [ ] wiz-review-milestone
-- [ ] wiz-validate-all
-- [ ] wiz-status-simple
+- [x] wiz-status ✓
+- [x] wiz-resume ✓
+- [x] wiz-review-phase ✓
+- [x] wiz-review-milestone ✓
+- [x] wiz-validate-all ✓
+- [x] wiz-status-simple ✓
 - [ ] (skip test-subagent-filewriting.md)
 
 ## Hooks
