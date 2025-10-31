@@ -135,7 +135,7 @@ if [[ "$INSTALLED" == "true" ]]; then
     echo "  2. Use Composer1 (recommended) for best experience"
     echo "  3. Run /wiz-prd to get started"
     echo ""
-    info "For documentation, see: README.md"
+    info "For documentation, see: https://github.com/NSXBet/wiz-cursor"
     exit 0
 fi
 
