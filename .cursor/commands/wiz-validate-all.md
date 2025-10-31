@@ -562,3 +562,4 @@ Detailed report: .wiz/validation-report.md
 - Useful before releases or major milestones
 - Integrates with quality gate skills (Phase 4)
 
+

@@ -1231,7 +1231,7 @@ Completed milestone ${MILESTONE_ID} via auto-execution.
 
 🤖 Generated with Wiz Planner
 
-Co-Authored-By: Wiz Planner <noreply@wiz-planner>"
+Co-Authored-By: Wiz <wiz@flutterbrazil.com>"
 
 # IMPORTANT:
 # - YES to --no-gpg-sign (avoid GPG signing issues)

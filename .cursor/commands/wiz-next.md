@@ -1294,7 +1294,7 @@ Completed milestone ${MILESTONE_ID}.
 
 🤖 Generated with Wiz Planner
 
-Co-Authored-By: Wiz Planner <noreply@wiz-planner>"
+Co-Authored-By: Wiz <wiz@flutterbrazil.com>"
 
 git commit --no-gpg-sign -m "$COMMIT_MSG"
 
