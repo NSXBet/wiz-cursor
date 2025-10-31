@@ -7,6 +7,17 @@ argument-hint: <slug> "<idea>"
 
 You are creating a comprehensive Product Requirements Document (PRD) using the Wiz Planner workflow.
 
+## ⚠️ CRITICAL: Human Answers Required
+
+**DO NOT answer questions yourself.** The questions generated in Stage 1 are for the **HUMAN USER** to answer. Your role is to:
+- Generate context-aware questions based on codebase analysis
+- Present questions to the human user
+- **WAIT for the human user to provide answers**
+- Parse the human user's answers
+- Generate PRD from the human user's decisions
+
+**If you find yourself answering questions without human input, STOP and present the questions to the user instead.**
+
 ## ⚠️ CRITICAL: File Writing Requirements
 
 **MAIN AGENT (you, running /wiz-prd) MUST WRITE FILES** at each stage. This command requires creating actual files, not just generating content:
@@ -32,18 +43,119 @@ This command delegates content generation to the **wiz-planner** agent (`.cursor
 
 This command follows a three-stage workflow:
 
-1. **Question Generation**: Generate 5-20 clarifying questions
-2. **Answer Collection**: User provides answers in chat (no re-run needed)
-3. **PRD Generation**: Research and create comprehensive PRD document
+1. **Codebase Analysis**: Analyze repository to detect language, patterns, and infrastructure (BEFORE generating questions)
+2. **Question Generation**: Generate 5-20 context-aware clarifying questions that require HUMAN judgment
+3. **Answer Collection**: **WAIT for HUMAN USER** to provide answers in chat (do NOT answer questions yourself)
+4. **PRD Generation**: Research and create comprehensive PRD document based on HUMAN USER answers
 
-## Stage 1: Question Generation
+## Stage 1: Codebase Analysis (BEFORE Question Generation)
 
-Generate 5-20 clarifying questions to understand the project requirements. Questions MUST include:
+**⚠️ CRITICAL: You MUST analyze the codebase FIRST before generating questions.**
 
-**Required Questions:**
-1. Primary language(s): Go, TypeScript, Python, C#, Java, or other?
-2. Benchmarking policy: hot spots only, comprehensive, or skip?
-3. Fuzzing policy: core areas only, comprehensive, or skip?
+Before generating any questions, analyze the repository to understand:
+- **Primary programming language(s)** - detect from file extensions and existing code
+- **Existing patterns and conventions** - frameworks, libraries, architectural patterns
+- **Current project structure** - what already exists
+- **Testing infrastructure** - what testing frameworks are already in use
+- **Dependencies and tools** - what's already configured
+
+**DO NOT ask questions about things you can determine from the codebase.**
+
+### Codebase Analysis Steps
+
+```bash
+# Detect primary language by analyzing file counts
+GO_FILES=$(find . -name "*.go" -not -path "*/vendor/*" -not -path "*/.git/*" 2>/dev/null | wc -l || echo "0")
+TS_FILES=$(find . \( -name "*.ts" -o -name "*.tsx" \) -not -path "*/node_modules/*" -not -path "*/.git/*" 2>/dev/null | wc -l || echo "0")
+PY_FILES=$(find . -name "*.py" -not -path "*/.git/*" -not -path "*/venv/*" 2>/dev/null | wc -l || echo "0")
+CS_FILES=$(find . -name "*.cs" -not -path "*/.git/*" -not -path "*/bin/*" 2>/dev/null | wc -l || echo "0")
+JAVA_FILES=$(find . -name "*.java" -not -path "*/.git/*" -not -path "*/target/*" 2>/dev/null | wc -l || echo "0")
+
+# Determine primary language (language with most files)
+PRIMARY_LANG="unknown"
+MAX_COUNT=0
+
+if [[ $GO_FILES -gt $MAX_COUNT ]]; then
+    PRIMARY_LANG="go"
+    MAX_COUNT=$GO_FILES
+fi
+if [[ $TS_FILES -gt $MAX_COUNT ]]; then
+    PRIMARY_LANG="typescript"
+    MAX_COUNT=$TS_FILES
+fi
+if [[ $PY_FILES -gt $MAX_COUNT ]]; then
+    PRIMARY_LANG="python"
+    MAX_COUNT=$PY_FILES
+fi
+if [[ $CS_FILES -gt $MAX_COUNT ]]; then
+    PRIMARY_LANG="csharp"
+    MAX_COUNT=$CS_FILES
+fi
+if [[ $JAVA_FILES -gt $MAX_COUNT ]]; then
+    PRIMARY_LANG="java"
+    MAX_COUNT=$JAVA_FILES
+fi
+
+# Check for existing test infrastructure
+HAS_GO_TESTS=$(find . -name "*_test.go" -not -path "*/vendor/*" 2>/dev/null | wc -l || echo "0")
+HAS_TS_TESTS=$(find . \( -name "*.test.ts" -o -name "*.spec.ts" \) -not -path "*/node_modules/*" 2>/dev/null | wc -l || echo "0")
+HAS_PY_TESTS=$(find . -name "test_*.py" -o -name "*_test.py" 2>/dev/null | wc -l || echo "0")
+
+# Check for existing benchmarking
+HAS_BENCHMARKS=$(find . -name "*_bench_test.go" -o -name "*_benchmark.go" 2>/dev/null | wc -l || echo "0")
+if [[ $HAS_BENCHMARKS -gt 0 ]]; then
+    HAS_BENCHMARKS="yes"
+else
+    HAS_BENCHMARKS="no"
+fi
+
+# Check for existing fuzzing
+HAS_FUZZ=$(find . -name "*_fuzz_test.go" -o -name "*_fuzz.go" 2>/dev/null | wc -l || echo "0")
+if [[ $HAS_FUZZ -gt 0 ]]; then
+    HAS_FUZZ="yes"
+else
+    HAS_FUZZ="no"
+fi
+
+# Save analysis results
+CODEBASE_ANALYSIS=$(cat <<EOF
+{
+  "primary_language": "$PRIMARY_LANG",
+  "language_file_counts": {
+    "go": $GO_FILES,
+    "typescript": $TS_FILES,
+    "python": $PY_FILES,
+    "csharp": $CS_FILES,
+    "java": $JAVA_FILES
+  },
+  "has_test_infrastructure": $((HAS_GO_TESTS + HAS_TS_TESTS + HAS_PY_TESTS)),
+  "has_benchmarks": "$HAS_BENCHMARKS",
+  "has_fuzzing": "$HAS_FUZZ"
+}
+EOF
+)
+```
+
+Use the analysis results to inform question generation. **DO NOT ask questions about things you already know from the codebase.**
+
+## Stage 2: Question Generation
+
+Generate 5-20 clarifying questions to understand the project requirements. Questions MUST be:
+
+1. **Context-Aware**: Skip questions about things already determined from codebase analysis
+2. **Require Human Judgment**: Only ask questions that need human decision-making
+3. **Pertinent**: Focus on aspects that matter for this specific idea and codebase
+
+**Conditional Required Questions** (only ask if not already determined):
+
+1. **Primary language** - ONLY ask if codebase analysis shows:
+   - No clear primary language (multiple languages with similar file counts)
+   - No code files found (new project)
+   - Otherwise, use detected language and state it: "Detected primary language: Go (from codebase analysis). Confirm or specify different language(s) if needed?"
+
+2. **Benchmarking policy** - Ask as: "What is the benchmarking policy? (hot spots only, comprehensive, or skip)" - BUT include context from analysis if benchmarks already exist
+
+3. **Fuzzing policy** - Ask as: "What is the fuzzing policy? (core areas only, comprehensive, or skip)" - BUT include context from analysis if fuzzing already exists
 
 **Additional Questions** (based on the idea):
 - Target users and personas
@@ -577,7 +689,94 @@ wiz_log_info "Created directory structure at $PRD_DIR"
 
 The `wiz-planner` agent provides verbose, research-focused planning output suitable for strategic planning activities. When you reference `.cursor/agents/wiz-planner.md` in the next step, it will automatically provide comprehensive, detailed planning content.
 
-### Step 4: Delegate to wiz-planner Agent
+### Step 4: Analyze Codebase (BEFORE Question Generation)
+
+**⚠️ CRITICAL: Analyze codebase FIRST to avoid asking obvious questions.**
+
+Before delegating to the agent, perform codebase analysis:
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Detect primary language by analyzing file counts
+GO_FILES=$(find . -name "*.go" -not -path "*/vendor/*" -not -path "*/.git/*" 2>/dev/null | wc -l || echo "0")
+TS_FILES=$(find . \( -name "*.ts" -o -name "*.tsx" \) -not -path "*/node_modules/*" -not -path "*/.git/*" 2>/dev/null | wc -l || echo "0")
+PY_FILES=$(find . -name "*.py" -not -path "*/.git/*" -not -path "*/venv/*" 2>/dev/null | wc -l || echo "0")
+CS_FILES=$(find . -name "*.cs" -not -path "*/.git/*" -not -path "*/bin/*" 2>/dev/null | wc -l || echo "0")
+JAVA_FILES=$(find . -name "*.java" -not -path "*/.git/*" -not -path "*/target/*" 2>/dev/null | wc -l || echo "0")
+
+# Determine primary language (language with most files)
+PRIMARY_LANG="unknown"
+MAX_COUNT=0
+
+if [[ $GO_FILES -gt $MAX_COUNT ]]; then
+    PRIMARY_LANG="go"
+    MAX_COUNT=$GO_FILES
+fi
+if [[ $TS_FILES -gt $MAX_COUNT ]]; then
+    PRIMARY_LANG="typescript"
+    MAX_COUNT=$TS_FILES
+fi
+if [[ $PY_FILES -gt $MAX_COUNT ]]; then
+    PRIMARY_LANG="python"
+    MAX_COUNT=$PY_FILES
+fi
+if [[ $CS_FILES -gt $MAX_COUNT ]]; then
+    PRIMARY_LANG="csharp"
+    MAX_COUNT=$CS_FILES
+fi
+if [[ $JAVA_FILES -gt $MAX_COUNT ]]; then
+    PRIMARY_LANG="java"
+    MAX_COUNT=$JAVA_FILES
+fi
+
+# Check for existing test infrastructure
+HAS_GO_TESTS=$(find . -name "*_test.go" -not -path "*/vendor/*" 2>/dev/null | wc -l || echo "0")
+HAS_TS_TESTS=$(find . \( -name "*.test.ts" -o -name "*.spec.ts" \) -not -path "*/node_modules/*" 2>/dev/null | wc -l || echo "0")
+HAS_PY_TESTS=$(find . -name "test_*.py" -o -name "*_test.py" 2>/dev/null | wc -l || echo "0")
+
+# Check for existing benchmarking
+HAS_BENCHMARKS=$(find . -name "*_bench_test.go" -o -name "*_benchmark.go" 2>/dev/null | wc -l || echo "0")
+if [[ $HAS_BENCHMARKS -gt 0 ]]; then
+    HAS_BENCHMARKS="yes"
+else
+    HAS_BENCHMARKS="no"
+fi
+
+# Check for existing fuzzing
+HAS_FUZZ=$(find . -name "*_fuzz_test.go" -o -name "*_fuzz.go" 2>/dev/null | wc -l || echo "0")
+if [[ $HAS_FUZZ -gt 0 ]]; then
+    HAS_FUZZ="yes"
+else
+    HAS_FUZZ="no"
+fi
+
+# Save analysis results as JSON
+CODEBASE_ANALYSIS=$(cat <<EOF
+{
+  "primary_language": "$PRIMARY_LANG",
+  "language_file_counts": {
+    "go": $GO_FILES,
+    "typescript": $TS_FILES,
+    "python": $PY_FILES,
+    "csharp": $CS_FILES,
+    "java": $JAVA_FILES
+  },
+  "has_test_infrastructure": $((HAS_GO_TESTS + HAS_TS_TESTS + HAS_PY_TESTS)),
+  "has_benchmarks": "$HAS_BENCHMARKS",
+  "has_fuzzing": "$HAS_FUZZ"
+}
+EOF
+)
+
+wiz_log_info "Codebase analysis complete - Primary language: $PRIMARY_LANG"
+wiz_log_info "File counts - Go: $GO_FILES, TS: $TS_FILES, Python: $PY_FILES, C#: $CS_FILES, Java: $JAVA_FILES"
+```
+
+The analysis results will be provided to the agent to inform question generation and prevent asking obvious questions.
+
+### Step 5: Delegate to wiz-planner Agent
 
 **⚠️ CRITICAL: Agent File Operation Limitation**
 
@@ -589,41 +788,78 @@ Agents invoked via agent references **cannot reliably write files**. This is a k
 - Agent focuses on: question generation, answer parsing, PRD content generation
 - Main agent handles: all file I/O operations
 
-**Workflow:**
-1. Delegate question generation to wiz-planner agent by referencing `.cursor/agents/wiz-planner.md`
-2. Agent returns questions as JSON in code block
-3. Main agent writes questions.json using Write tool
-4. Main agent creates state.json using Write tool
-5. Main agent presents questions to user
-6. When user provides answers, delegate to wiz-planner to parse and generate PRD
-7. Agent returns answers.json and prd.md content as code blocks
-8. Main agent writes all files using Write tool
+**⚠️ CRITICAL: Questions MUST be answered by HUMAN, NOT by AI**
 
-Reference the `.cursor/agents/wiz-planner.md` agent with the following prompt:
+**DO NOT answer the questions yourself.** The questions are for the HUMAN USER to answer. Your job is to:
+1. Generate the questions
+2. Present them to the user
+3. Wait for the user to provide answers
+4. Parse the user's answers
+5. Generate the PRD from the user's answers
+
+**Workflow:**
+1. Analyze codebase first (detect language, patterns, infrastructure)
+2. Delegate question generation to wiz-planner agent with codebase context
+3. Agent returns questions as JSON in code block
+4. Main agent writes questions.json using Write tool
+5. Main agent creates state.json using Write tool
+6. **Main agent presents questions to user and WAITS for human answers**
+7. When user provides answers, delegate to wiz-planner to parse and generate PRD
+8. Agent returns answers.json and prd.md content as code blocks
+9. Main agent writes all files using Write tool
+
+Reference the `.cursor/agents/wiz-planner.md` agent with the following prompt (including the codebase analysis):
 
 ```
 Generate clarifying questions for a PRD about: {IDEA}
 
+## ⚠️ CRITICAL INSTRUCTIONS
+
+**DO NOT ANSWER THE QUESTIONS YOURSELF.** These questions are for the HUMAN USER to answer. Your job is ONLY to generate the questions, not to answer them.
+
+**USE CODEBASE ANALYSIS:** I've analyzed the codebase and found:
+{CODEBASE_ANALYSIS}
+
+**Example:** If primary_language is "go" with 500+ files, DON'T ask "What language?" - instead ask "Detected primary language: Go (from codebase analysis). Confirm Go or specify different language(s) if needed?"
+
+Use this information to:
+- Skip questions about things already determined (e.g., if primary language is clearly Go, don't ask "what language?" but instead ask "Confirm Go or specify different language(s) if needed?")
+- Make questions context-aware (e.g., if benchmarks already exist, ask "Extend existing benchmarking or change policy?")
+- Focus on aspects that require HUMAN JUDGMENT and DECISION-MAKING
+
 ## Your Task
 
-1. Analyze the idea to determine appropriate question count (5-20 based on complexity)
-2. Generate questions following the guidelines in this command
-3. Ensure the first 3 questions are EXACTLY the required questions
-4. Validate questions against the JSON schema
-5. Return questions as JSON in a code block (do NOT write files)
+1. Review the codebase analysis provided above
+2. Analyze the idea to determine appropriate question count (5-20 based on complexity)
+3. Generate questions following the guidelines in this command
+4. **ONLY ask questions that require HUMAN JUDGMENT** - skip obvious questions
+5. **DO NOT answer questions yourself** - generate questions only
+6. Validate questions against the JSON schema
+7. Return questions as JSON in a code block (do NOT write files)
 
-## Required Questions (indices 1-3, exact wording)
+## Conditional Required Questions
 
-1. "What are the primary language(s) for this project? (Go, TypeScript, Python, C#, Java, or other)"
-   Rationale: "Determines which design guidelines to generate and which language specialist subagents to consult during implementation"
+**Question 1: Primary Language** (ONLY if not clearly determined from codebase)
+- If codebase has clear primary language (e.g., 80%+ Go files): Ask confirmation question like "Detected primary language: Go (from codebase analysis). Confirm Go or specify different language(s) if needed?"
+- If codebase has mixed languages or no code: Ask "What are the primary language(s) for this project? (Go, TypeScript, Python, C#, Java, or other)"
+- Rationale: "Determines which design guidelines to generate and which language specialist subagents to consult during implementation"
 
-2. "What is the benchmarking policy? (hot spots only, comprehensive, or skip)"
-   Rationale: "Defines performance measurement requirements for critical code paths and optimization validation"
+**Question 2: Benchmarking Policy** (ALWAYS ask, but context-aware)
+- If benchmarks exist: "Existing benchmarks found in codebase. What is the benchmarking policy going forward? (hot spots only, comprehensive, or skip)"
+- If no benchmarks: "What is the benchmarking policy? (hot spots only, comprehensive, or skip)"
+- Rationale: "Defines performance measurement requirements for critical code paths and optimization validation"
 
-3. "What is the fuzzing policy? (core areas only, comprehensive, or skip)"
-   Rationale: "Determines fuzz testing scope for input validation and security-critical components"
+**Question 3: Fuzzing Policy** (ALWAYS ask, but context-aware)
+- If fuzzing exists: "Existing fuzz tests found in codebase. What is the fuzzing policy going forward? (core areas only, comprehensive, or skip)"
+- If no fuzzing: "What is the fuzzing policy? (core areas only, comprehensive, or skip)"
+- Rationale: "Determines fuzz testing scope for input validation and security-critical components"
 
 ## Additional Questions (indices 4+)
+
+**IMPORTANT**: Only generate questions that:
+- Require HUMAN JUDGMENT (not things you can determine from codebase)
+- Are PERTINENT to the specific idea provided
+- Help clarify REQUIREMENTS and DECISIONS that affect implementation
 
 Tailor questions to the specific idea provided. Cover these areas:
 
@@ -664,19 +900,21 @@ Each question must be a JSON object:
   "rationale": "<brief explanation connecting to PRD sections or implementation needs>"
 }
 
-## Return Questions (Do NOT Write Files)
+## Return Questions (Do NOT Write Files OR Answer Questions)
 
-**CRITICAL**: You are an agent and **cannot write files**. Instead, return the questions as JSON in a code block.
+**CRITICAL**: 
+1. You are an agent and **cannot write files**. Return questions as JSON in a code block.
+2. **DO NOT ANSWER THE QUESTIONS YOURSELF.** These are for the HUMAN USER to answer.
 
 **Expected Output Format:**
 
-Return the questions in this exact format:
+Return ONLY the questions (not answers) in this exact format:
 
 \`\`\`json
 [
   {
     "index": 1,
-    "question": "What are the primary language(s) for this project? (Go, TypeScript, Python, C#, Java, or other)",
+    "question": "Detected primary language: Go (from codebase analysis). Confirm Go or specify different language(s) if needed?",
     "rationale": "Determines which design guidelines to generate and which language specialist subagents to consult during implementation"
   },
   {
@@ -688,15 +926,17 @@ Return the questions in this exact format:
 ]
 \`\`\`
 
-The main agent will:
+**DO NOT include answers in your response.** Only return the questions. The main agent will:
 1. Extract the JSON from your response
 2. Validate it against the schema
 3. Write it to `.wiz/<slug>/intake/questions.json`
 4. Create the state.json file
-5. Present the questions to the user
+5. **Present the questions to the HUMAN USER and wait for their answers**
 ```
 
-### Step 5: Main Agent Writes Files
+**When calling the agent, replace {CODEBASE_ANALYSIS} with the actual JSON from Step 4, and replace {IDEA} with the actual idea from arguments.**
+
+### Step 6: Main Agent Writes Files and Presents Questions
 
 After receiving the agent's response with questions JSON in a code block, the **main agent** (you, executing the /wiz-prd command) must:
 
@@ -714,7 +954,8 @@ After receiving the agent's response with questions JSON in a code block, the **
    {
      "stage": "awaiting_answers",
      "created_at": "$TIMESTAMP",
-     "updated_at": "$TIMESTAMP"
+     "updated_at": "$TIMESTAMP",
+     "codebase_analysis": $CODEBASE_ANALYSIS
    }
    EOF
    ```
@@ -727,46 +968,67 @@ After receiving the agent's response with questions JSON in a code block, the **
 
 5. **Present questions to user**:
    ```
-   I've generated N clarifying questions to help create a comprehensive PRD for: {IDEA}
+   📋 PRD Question Generation Complete
    
-   <display questions in numbered list format>
+   I've analyzed the codebase and generated N clarifying questions to help create a comprehensive PRD for: {IDEA}
    
-   Please provide answers to these questions in the chat. You do NOT need to re-run this command.
+   **Codebase Analysis Summary:**
+   - Primary language detected: {PRIMARY_LANG} ({MAX_COUNT} files)
+   - Test infrastructure: {HAS_TESTS} test files found
+   - Existing benchmarks: {HAS_BENCHMARKS}
+   - Existing fuzzing: {HAS_FUZZ}
    
-   Once you provide answers, I will automatically:
+   **Note**: Questions have been tailored based on this analysis. Questions about things already determined from the codebase have been skipped or made context-aware.
+   
+   **Questions for YOU to answer:**
+   
+   <display questions in numbered list format with rationale>
+   
+   ⚠️ **IMPORTANT**: These questions require YOUR HUMAN JUDGMENT and DECISION-MAKING.
+   Please provide YOUR answers to these questions in the chat. You do NOT need to re-run this command.
+   
+   Once you provide YOUR answers, I will automatically:
    1. Parse and save your answers
    2. Research relevant technical details
-   3. Generate a comprehensive PRD document
+   3. Generate a comprehensive PRD document based on YOUR decisions
    
    Format your answers however is comfortable for you - I'll parse them intelligently.
    ```
 
-6. **Verify files exist**:
+6. **STOP and WAIT for user answers** - Do NOT proceed to Stage 2 until the user provides answers
+
+7. **Verify files exist**:
    ```bash
    ls -la .wiz/$SLUG/intake/
    ```
 
 ## Stage 2: Answer Processing
 
-When the user provides answers in the chat (as a continuation), the `wiz-planner` agent will automatically detect and process them.
+**⚠️ CRITICAL: WAIT for HUMAN USER to provide answers. DO NOT answer questions yourself.**
+
+When the HUMAN USER provides answers in the chat (as a continuation), the `wiz-planner` agent will detect and process them.
 
 ### Detection and Parsing
 
+**⚠️ CRITICAL: Parse HUMAN USER answers, DO NOT generate answers yourself.**
+
 The agent should:
 
-1. **Detect Answer Context**: Recognize that the user is responding to the questions from Stage 1
+1. **Detect Answer Context**: Recognize that the HUMAN USER is responding to the questions from Stage 1
    - Check if state is "awaiting_answers"
    - Load questions from `.wiz/<slug>/intake/questions.json`
+   - Load codebase analysis from state.json
 
-2. **Parse Answers Intelligently**: Extract answers from the user's message
+2. **Parse HUMAN USER Answers Intelligently**: Extract answers from the HUMAN USER's message
    - Support various formats: numbered lists, natural language, mixed formats
    - Match answers to questions by index or content
    - Handle multi-line answers and code blocks
    - Allow "skip" or "N/A" for optional questions
+   - **DO NOT** infer or guess answers - only use what the HUMAN USER explicitly provided
 
-3. **Validate Completeness**: Ensure required questions have answers
-   - Questions 1-3 (language, benchmarking, fuzzing) MUST have non-empty answers
-   - Prompt for missing required answers before proceeding
+3. **Validate Completeness**: Ensure required questions have HUMAN USER answers
+   - Questions 1-3 (language, benchmarking, fuzzing) MUST have non-empty answers from HUMAN USER
+   - If answers are missing, prompt HUMAN USER for missing answers - DO NOT generate answers yourself
 
 ### Answer Format
 
