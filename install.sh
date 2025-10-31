@@ -61,75 +61,85 @@ echo ""
 TEMP_DIR=$(mktemp -d)
 trap "rm -rf $TEMP_DIR" EXIT
 
-# Clone repository (shallow, single branch, sparse checkout for .cursor only)
-info "Downloading .cursor directory..."
+# Try multiple installation methods in sequence
+INSTALLED=false
 
+# Method 1: Git sparse checkout (most efficient, works for public/private repos with git access)
+info "Trying git sparse checkout method..."
 if git clone --depth 1 --branch "$BRANCH" --filter=blob:none --sparse "$REPO_URL" "$TEMP_DIR/repo" 2>/dev/null; then
     cd "$TEMP_DIR/repo"
-    git sparse-checkout init --cone
-    git sparse-checkout set .cursor
+    git sparse-checkout init --cone 2>/dev/null
+    git sparse-checkout set .cursor 2>/dev/null
     cd - > /dev/null
     
-    # Copy .cursor directory
     if [[ -d "$TEMP_DIR/repo/.cursor" ]]; then
         cp -r "$TEMP_DIR/repo/.cursor" .
-        success "Wiz Planner installed successfully!"
-        echo ""
-        info "Next steps:"
-        echo "  1. Open your project in Cursor 2.0+"
-        echo "  2. Use Composer1 (recommended) for best experience"
-        echo "  3. Run /wiz-prd to get started"
-        echo ""
-        info "For documentation, see: README.md"
-    else
-        error "Failed to find .cursor directory in repository"
-        exit 1
+        INSTALLED=true
     fi
-else
-    # Fallback: try downloading via GitHub API if it's a GitHub repo
-    if [[ "$REPO_URL" == *"github.com"* ]]; then
-        info "Trying alternative download method..."
+fi
+
+# Method 2: Try downloading as tarball (if Method 1 failed and it's a GitHub repo)
+if [[ "$INSTALLED" == "false" ]] && [[ "$REPO_URL" == *"github.com"* ]]; then
+    # Extract owner and repo from URL
+    if [[ "$REPO_URL" =~ github.com[:/]([^/]+)/([^/]+)\.git ]]; then
+        OWNER="${BASH_REMATCH[1]}"
+        REPO="${BASH_REMATCH[2]}"
         
-        # Extract owner and repo from URL
-        if [[ "$REPO_URL" =~ github.com[:/]([^/]+)/([^/]+)\.git ]]; then
-            OWNER="${BASH_REMATCH[1]}"
-            REPO="${BASH_REMATCH[2]}"
-            
-            # Try downloading as tarball
-            TARBALL_URL="https://github.com/$OWNER/$REPO/archive/refs/heads/$BRANCH.tar.gz"
-            
+        info "Trying tarball download method..."
+        
+        # Try multiple tarball URL formats
+        TARBALL_URLS=(
+            "https://github.com/$OWNER/$REPO/archive/refs/heads/$BRANCH.tar.gz"
+            "https://github.com/$OWNER/$REPO/archive/$BRANCH.tar.gz"
+        )
+        
+        for TARBALL_URL in "${TARBALL_URLS[@]}"; do
             if command -v curl &> /dev/null && command -v tar &> /dev/null; then
-                info "Downloading via tarball..."
+                info "Trying: $TARBALL_URL"
                 if curl -sL "$TARBALL_URL" | tar -xz -C "$TEMP_DIR" 2>/dev/null; then
                     # Find .cursor directory in extracted tarball
-                    CURSOR_DIR=$(find "$TEMP_DIR" -type d -name ".cursor" -path "*/$REPO-*/.cursor" | head -1)
+                    CURSOR_DIR=$(find "$TEMP_DIR" -type d -name ".cursor" -path "*/$REPO-*/.cursor" 2>/dev/null | head -1)
                     if [[ -n "$CURSOR_DIR" ]] && [[ -d "$CURSOR_DIR" ]]; then
                         cp -r "$CURSOR_DIR" .
-                        success "Wiz Planner installed successfully!"
-                        echo ""
-                        info "Next steps:"
-                        echo "  1. Open your project in Cursor 2.0+"
-                        echo "  2. Use Composer1 (recommended) for best experience"
-                        echo "  3. Run /wiz-prd to get started"
-                        echo ""
-                        info "For documentation, see: README.md"
-                        exit 0
+                        INSTALLED=true
+                        break
                     fi
                 fi
             fi
-        fi
+        done
     fi
-    
-    error "Failed to download .cursor directory"
-    echo ""
-    error "Possible reasons:"
-    echo "  - Network connectivity issues"
-    echo "  - Repository URL is incorrect"
-    echo "  - Repository is private (use manual installation)"
-    echo ""
-    info "Try manual installation instead:"
-    echo "  1. Clone or download the repository"
-    echo "  2. Copy the .cursor directory to your project root"
-    exit 1
 fi
+
+# Success!
+if [[ "$INSTALLED" == "true" ]]; then
+    success "Wiz Planner installed successfully!"
+    echo ""
+    info "Next steps:"
+    echo "  1. Open your project in Cursor 2.0+"
+    echo "  2. Use Composer1 (recommended) for best experience"
+    echo "  3. Run /wiz-prd to get started"
+    echo ""
+    info "For documentation, see: README.md"
+    exit 0
+fi
+
+# All methods failed
+error "Failed to download .cursor directory"
+echo ""
+error "Tried multiple installation methods but all failed."
+echo ""
+error "Possible reasons:"
+echo "  - Network connectivity issues"
+echo "  - Repository URL is incorrect"
+echo "  - Repository is private and requires authentication"
+echo ""
+info "Try manual installation instead:"
+echo "  1. Clone or download the repository"
+echo "  2. Copy the .cursor directory to your project root"
+echo ""
+info "Manual installation command:"
+echo "  git clone --depth 1 --branch $BRANCH --filter=blob:none --sparse $REPO_URL /tmp/wiz-install"
+echo "  cd /tmp/wiz-install && git sparse-checkout init --cone && git sparse-checkout set .cursor"
+echo "  cp -r .cursor /path/to/your/project && rm -rf /tmp/wiz-install"
+exit 1
 

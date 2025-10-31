@@ -14,15 +14,16 @@
 
 #### Option 1: Quick Install (Recommended)
 
-Run this command in your project root:
+**Using the install script** (automatically tries multiple methods):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/main/install.sh | bash
 ```
 
-Or if you prefer to review the script first (recommended for security):
+**Or download and review the script first** (recommended for security):
 
 ```bash
+# Download the script
 curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/main/install.sh -o install.sh
 # Review the script
 cat install.sh
@@ -30,11 +31,17 @@ cat install.sh
 bash install.sh
 ```
 
+The install script automatically tries multiple installation methods:
+1. **Git sparse checkout** (most efficient, works for public/private repos with git access)
+2. **GitHub tarball download** (fallback for public repos, tries multiple URL formats)
+
 The script will:
+- Try multiple URLs and methods automatically
 - Download the `.cursor` directory from the repository
 - Place it in your current directory
 - Prompt before overwriting if `.cursor` already exists
 - Clean up temporary files automatically
+- Provide helpful error messages if all methods fail
 
 #### Option 2: Manual Installation
 
