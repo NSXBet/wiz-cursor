@@ -14,7 +14,15 @@
 
 #### Option 1: Quick Install (Recommended)
 
-**Using the install script** (automatically tries multiple methods):
+**Method 1: Using GitHub CLI (`gh`)** - Works for both public and private repos:
+
+```bash
+gh api repos/NSXBet/wiz-cursor/contents/install.sh?ref=main --jq -r .content | base64 -d | bash
+```
+
+> **Note**: Requires GitHub CLI (`gh`) to be installed and authenticated. Install from [cli.github.com](https://cli.github.com/)
+
+**Method 2: Using `curl`** - Works for public repositories:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/main/install.sh | bash
@@ -31,6 +39,20 @@ cat install.sh
 bash install.sh
 ```
 
+**Method 3: Manual installation** - Clone and copy `.cursor` directory:
+
+```bash
+# Clone just the .cursor directory using sparse checkout
+PROJECT_DIR=$(pwd)
+git clone --depth 1 --branch main --filter=blob:none --sparse https://github.com/NSXBet/wiz-cursor.git /tmp/wiz-install
+cd /tmp/wiz-install
+git sparse-checkout init --cone
+git sparse-checkout set .cursor
+cp -r .cursor "$PROJECT_DIR"
+cd "$PROJECT_DIR"
+rm -rf /tmp/wiz-install
+```
+
 The install script automatically tries multiple installation methods:
 1. **Git sparse checkout** (most efficient, works for public/private repos with git access)
 2. **GitHub tarball download** (fallback for public repos, tries multiple URL formats)
@@ -43,11 +65,9 @@ The script will:
 - Clean up temporary files automatically
 - Provide helpful error messages if all methods fail
 
-#### Option 2: Manual Installation
+#### Option 2: Alternative Manual Installation
 
-1. Clone or download this repository
-2. Copy the `.cursor` directory to your project root
-3. That's it! Wiz commands are now available in Cursor
+If you prefer to clone the entire repository:
 
 ```bash
 # Clone the repository
