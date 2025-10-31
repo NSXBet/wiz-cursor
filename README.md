@@ -17,7 +17,7 @@
 **Method 1: Using GitHub CLI (`gh`)** - Works for both public and private repos:
 
 ```bash
-gh api repos/NSXBet/wiz-cursor/contents/install.sh?ref=main --jq -r .content | base64 -d | bash
+gh api "repos/NSXBet/wiz-cursor/contents/install.sh?ref=main" --jq '.content' | base64 -d | bash
 ```
 
 > **Note**: Requires GitHub CLI (`gh`) to be installed and authenticated. Install from [cli.github.com](https://cli.github.com/)
