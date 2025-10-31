@@ -8,18 +8,18 @@
 - [x] wiz-java-specialist (with embedded quality-gates-java) ✓
 - [x] wiz-docker-specialist (no quality gates) ✓
 - [x] wiz-planner (no skills) ✓
-- [ ] wiz-reviewer (with embedded nfr-checker)
-- [ ] wiz-milestone-analyst (no skills)
+- [x] wiz-reviewer (with embedded nfr-checker) ✓
+- [x] wiz-milestone-analyst (no skills) ✓
 
 ## Commands (13 total)
-- [ ] wiz-help
-- [ ] wiz-next
+- [x] wiz-help ✓
+- [x] wiz-next ✓
+- [x] wiz-auto ✓
 - [ ] wiz-prd
 - [ ] wiz-phases
 - [ ] wiz-milestones
 - [ ] wiz-status
 - [ ] wiz-resume
-- [ ] wiz-auto
 - [ ] wiz-review-phase
 - [ ] wiz-review-milestone
 - [ ] wiz-validate-all
