@@ -73,7 +73,15 @@ if git clone --depth 1 --branch "$BRANCH" --filter=blob:none --sparse "$REPO_URL
     cd - > /dev/null
     
     if [[ -d "$TEMP_DIR/repo/.cursor" ]]; then
-        cp -r "$TEMP_DIR/repo/.cursor" .
+        # Create .cursor directory
+        mkdir -p .cursor
+        # Copy only agents/ and commands/ directories
+        if [[ -d "$TEMP_DIR/repo/.cursor/agents" ]]; then
+            cp -r "$TEMP_DIR/repo/.cursor/agents" .cursor/
+        fi
+        if [[ -d "$TEMP_DIR/repo/.cursor/commands" ]]; then
+            cp -r "$TEMP_DIR/repo/.cursor/commands" .cursor/
+        fi
         INSTALLED=true
     fi
 fi
@@ -100,7 +108,15 @@ if [[ "$INSTALLED" == "false" ]] && [[ "$REPO_URL" == *"github.com"* ]]; then
                     # Find .cursor directory in extracted tarball
                     CURSOR_DIR=$(find "$TEMP_DIR" -type d -name ".cursor" -path "*/$REPO-*/.cursor" 2>/dev/null | head -1)
                     if [[ -n "$CURSOR_DIR" ]] && [[ -d "$CURSOR_DIR" ]]; then
-                        cp -r "$CURSOR_DIR" .
+                        # Create .cursor directory
+                        mkdir -p .cursor
+                        # Copy only agents/ and commands/ directories
+                        if [[ -d "$CURSOR_DIR/agents" ]]; then
+                            cp -r "$CURSOR_DIR/agents" .cursor/
+                        fi
+                        if [[ -d "$CURSOR_DIR/commands" ]]; then
+                            cp -r "$CURSOR_DIR/commands" .cursor/
+                        fi
                         INSTALLED=true
                         break
                     fi
