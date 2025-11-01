@@ -4,25 +4,44 @@
 
 ## Installing
 
+Install the latest stable release:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash
+```
+
+**Install a specific version:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash -- --version 0.1.2
+```
+
+**Install latest from main branch (development version):**
+```bash
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash -- --version HEAD
 ```
 
 For further installation instructions, see [Installation Instructions](#installation-instructions).
 
 ### Updating Wiz
 
-To update Wiz to the latest version, simply run the installation command again:
+To update Wiz, simply run the installation command again. The script automatically detects existing installations and updates them:
 
+**Update to latest stable release:**
 ```bash
-# Using GitHub CLI
-gh api "repos/NSXBet/wiz-cursor/contents/install.sh?ref=main" --jq '.content' | base64 -d | bash
-
-# Or using curl
 curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash
 ```
 
-The script automatically detects existing installations and updates them without asking for confirmation.
+**Update to a specific version:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash -- --version 0.1.2
+```
+
+**Update to latest development version:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash -- --version HEAD
+```
+
+> **Note**: Updates work the same as fresh installs - the script automatically removes old Wiz files and installs the specified version without asking for confirmation.
 
 ## Using Wiz to create a new project or Feature
 
@@ -209,40 +228,59 @@ There are several ways to install Wiz in your project for Cursor:
 
 ### Method 1: Quick Install Script (Recommended)
 
-**Using `curl`** (works for public repositories):
-
+**Install latest stable release:**
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash
 ```
 
-**Or download and review the script first** (recommended for security):
+**Install a specific version:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash -- --version 0.1.2
+```
 
+**Install latest from main branch (development):**
+```bash
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash -- --version HEAD
+```
+
+**Download and review the script first** (recommended for security):
 ```bash
 # Download the script
-curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh -o install.sh
 # Review the script
 cat install.sh
-# Then run it
-bash install.sh
+# Then run it (with optional version)
+bash install.sh                    # Latest stable release
+bash install.sh --version 0.1.2    # Specific version
+bash install.sh --version HEAD     # Latest from main branch
 ```
 
 **Using GitHub CLI (`gh`)** (works for both public and private repos):
-
 ```bash
+# Latest stable release
 gh api "repos/NSXBet/wiz-cursor/contents/install.sh?ref=main" --jq '.content' | base64 -d | bash
+
+# Specific version
+gh api "repos/NSXBet/wiz-cursor/contents/install.sh?ref=main" --jq '.content' | base64 -d | bash -- --version 0.1.2
 ```
 
-> **Note**: Requires GitHub CLI (`gh`) to be installed and authenticated. Install from [cli.github.com](https://cli.github.com/)
+> **Note**: GitHub CLI (`gh`) requires authentication. Install from [cli.github.com](https://cli.github.com/)
+
+**Version Options:**
+- **No version specified**: Automatically installs the latest stable release from GitHub
+- **`--version 0.1.2`**: Installs a specific release version (replace with desired version)
+- **`--version HEAD`**: Installs the latest code from the main branch (development version)
 
 The install script automatically tries multiple installation methods:
 1. **Git sparse checkout** (most efficient, works for public/private repos with git access)
 2. **GitHub tarball download** (fallback for public repos, tries multiple URL formats)
 
 The script will:
+- Automatically detect the latest stable release if no version is specified
 - Try multiple URLs and methods automatically
 - Download the `.cursor` directory from the repository
 - Place it in your current directory
-- Prompt before overwriting if `.cursor` already exists
+- Automatically update existing installations (removes old Wiz files and installs new version)
 - Clean up temporary files automatically
 - Provide helpful error messages if all methods fail
 
