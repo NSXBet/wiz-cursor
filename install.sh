@@ -32,18 +32,22 @@ error() {
     echo -e "${RED}✗${NC} $1" >&2
 }
 
-# Check if .cursor directory already exists
-if [[ -d ".cursor" ]]; then
-    warning ".cursor directory already exists!"
-    echo ""
-    read -p "Do you want to overwrite it? (y/N): " -n 1 -r
-    echo ""
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        info "Installation cancelled."
-        exit 0
+# Check if Wiz is already installed (not just .cursor directory)
+WIZ_INSTALLED=false
+if [[ -d ".cursor/agents" ]] || [[ -d ".cursor/commands" ]]; then
+    # Check if there are Wiz-specific files
+    if [[ -n "$(find .cursor/agents -name 'wiz-*.md' 2>/dev/null)" ]] || \
+       [[ -n "$(find .cursor/commands -name 'wiz-*.md' 2>/dev/null)" ]]; then
+        WIZ_INSTALLED=true
     fi
-    info "Removing existing .cursor directory..."
-    rm -rf .cursor
+fi
+
+if [[ "$WIZ_INSTALLED" == "true" ]]; then
+    warning "Wiz Planner is already installed!"
+    info "Updating to latest version..."
+    echo ""
+    # Remove only Wiz-specific files for clean update
+    rm -rf .cursor/agents/wiz-* .cursor/commands/wiz-* 2>/dev/null || true
 fi
 
 # Check if git is available
@@ -128,7 +132,11 @@ fi
 
 # Success!
 if [[ "$INSTALLED" == "true" ]]; then
-    success "Wiz Planner installed successfully!"
+    if [[ "$WIZ_INSTALLED" == "true" ]]; then
+        success "Wiz Planner updated successfully!"
+    else
+        success "Wiz Planner installed successfully!"
+    fi
     echo ""
     info "Next steps:"
     echo "  1. Open your project in Cursor 2.0+"

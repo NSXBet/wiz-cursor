@@ -10,6 +10,20 @@ curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/main/install.sh |
 
 For further installation instructions, see [Installation Instructions](#installation-instructions).
 
+### Updating Wiz
+
+To update Wiz to the latest version, simply run the installation command again:
+
+```bash
+# Using GitHub CLI
+gh api "repos/NSXBet/wiz-cursor/contents/install.sh?ref=main" --jq '.content' | base64 -d | bash
+
+# Or using curl
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/main/install.sh | bash
+```
+
+The script automatically detects existing installations and updates them without asking for confirmation.
+
 ## Using Wiz to create a new project or Feature
 
 Wiz helps you plan and structure your projects through a three-step process: creating a Product Requirements Document (PRD), breaking it into phases, and generating detailed milestones.
@@ -95,6 +109,7 @@ Create the User model struct with required fields.
 - [ ] Documentation updated
 ```
 
+### Your First Project
 ## Iterating on your milestones
 
 Once you have milestones, you can execute them systematically using `/wiz-next` and `/wiz-auto`.
