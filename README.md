@@ -2,7 +2,189 @@
 
 **Wiz** is an intelligent project planning and execution system that works seamlessly with Cursor to help you break down complex features into manageable milestones and execute them systematically.
 
-## 🚀 Quick Start
+## Installing
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/main/install.sh | bash
+```
+
+For further installation instructions, see [Installation Instructions](#installation-instructions).
+
+## Using Wiz to create a new project or Feature
+
+Wiz helps you plan and structure your projects through a three-step process: creating a Product Requirements Document (PRD), breaking it into phases, and generating detailed milestones.
+
+### Step 1: Create a Product Requirements Document (PRD)
+
+Start by creating a comprehensive PRD for your feature or project:
+
+```bash
+/wiz-prd <slug> "<idea>"
+```
+
+**Example:**
+```bash
+/wiz-prd auth-system "Add user authentication with JWT tokens"
+```
+
+**What happens:**
+1. Wiz analyzes your codebase to understand your project structure
+2. Wiz asks 8-12 clarifying questions about your idea
+3. You answer the questions (Wiz waits for your responses)
+4. Wiz researches best practices and current standards
+5. Wiz generates a comprehensive PRD document
+
+**Output:** `.wiz/<slug>/prd.md` - A detailed PRD with overview, requirements, architecture, success criteria, risks, and implementation notes.
+
+### Step 2: Generate Implementation Phases
+
+Break your PRD into logical implementation phases:
+
+```bash
+/wiz-phases <slug>
+```
+
+**Example:**
+```bash
+/wiz-phases auth-system
+```
+
+**What happens:**
+1. Wiz reads your PRD
+2. Wiz breaks it into 3-15 logical phases (each ~3-5 days of work)
+3. Each phase has clear goals, dependencies, and acceptance criteria
+4. Wiz generates design guidelines for your project's languages
+
+**Output:** `.wiz/<slug>/phases/phase1.md`, `phase2.md`, etc. - Phase documents with goals and dependencies.
+
+### Step 3: Generate Detailed Milestones
+
+Create ~1-hour milestones for each phase:
+
+```bash
+/wiz-milestones <slug>
+```
+
+**Example:**
+```bash
+/wiz-milestones auth-system
+```
+
+**What happens:**
+1. Wiz reads all phase documents
+2. Wiz creates 15-40 milestones per phase (each ~1 hour)
+3. Each milestone has specific, testable acceptance criteria
+4. Milestones include NFR requirements (P0-P4 priority order)
+
+**Output:** Updated phase files with milestones added, plus `.wiz/<slug>/IMPLEMENTATION_GUIDE.md`.
+
+**Example milestone structure:**
+```markdown
+### P01M01: Create User Model
+
+**Status:** 🚧 TODO
+**ID:** P01M01
+
+**Goal**
+Create the User model struct with required fields.
+
+**Acceptance Criteria**
+- [ ] User struct defined with email, password hash, and timestamps
+- [ ] Database migration created
+- [ ] Unit tests written and passing
+- [ ] Documentation updated
+```
+
+## Iterating on your milestones
+
+Once you have milestones, you can execute them systematically using `/wiz-next` and `/wiz-auto`.
+
+### Using `/wiz-next`
+
+Execute the next TODO milestone one at a time:
+
+```bash
+/wiz-next [slug] [count]
+```
+
+**What happens:**
+1. Wiz finds the next TODO milestone
+2. Wiz loads context (phase, milestone, design guidelines)
+3. Wiz consults language specialists for guidance
+4. Wiz implements the milestone (code, tests, documentation)
+5. Wiz runs quality checks:
+   - ✅ All tests pass (zero failures, zero skips)
+   - ✅ All linters pass (zero errors)
+   - ✅ Entire codebase healthy (not just new code)
+6. Wiz creates a properly formatted commit
+7. Wiz marks milestone as COMPLETE
+
+**Example:**
+```bash
+/wiz-next                # Execute one milestone
+/wiz-next auth-system    # Execute one milestone for specific project
+/wiz-next auth-system 3  # Execute 3 milestones
+```
+
+**Commit format:**
+```
+feat(P01M01): Create User Model
+
+Completed milestone P01M01.
+
+🤖 Generated with Wiz Planner
+
+Co-Authored-By: Wiz <wiz@flutterbrazil.com>
+```
+
+### Using `/wiz-auto`
+
+Automatically execute multiple milestones with intelligent gating:
+
+```bash
+/wiz-auto [slug] [max-milestones]
+```
+
+**What happens:**
+1. Wiz finds the next TODO milestone
+2. **Before executing**, `wiz-milestone-analyst` evaluates the NEXT milestone
+3. **If PROCEED**: Requirements clear, low risk → execute milestone
+4. **If HALT**: Ambiguities detected → present questions to you and wait for input
+5. Repeat until no more milestones or max reached
+
+**Gating logic:**
+- **PROCEED**: Clear requirements, obvious implementation path, low risk
+- **HALT**: Ambiguities, design decisions needed, high complexity, security concerns
+
+**Example:**
+```bash
+/wiz-auto                # Auto-execute until done or halted
+/wiz-auto auth-system    # Auto-execute for specific project
+/wiz-auto auth-system 10 # Auto-execute up to 10 milestones
+```
+
+**Why use `/wiz-auto`?**
+- Perfect for batch implementation with safety checks
+- Automatically stops when human input is needed
+- Saves time by executing straightforward milestones automatically
+- Conservative approach prevents costly mistakes
+
+### Resuming interrupted work
+
+If work is interrupted, resume where you left off:
+
+```bash
+/wiz-resume
+```
+
+This command:
+- Loads your resume state
+- Shows milestone details and elapsed time
+- Lets you continue, skip, or cancel
+
+## Installation Instructions
+
+There are several ways to install Wiz in your project for Cursor:
 
 ### Prerequisites
 
@@ -10,19 +192,9 @@
 - **Composer1** - We recommend using Composer1 (not Composer2) for the best experience with Wiz commands
 - A project repository (Git-based)
 
-### Installation
+### Method 1: Quick Install Script (Recommended)
 
-#### Option 1: Quick Install (Recommended)
-
-**Method 1: Using GitHub CLI (`gh`)** - Works for both public and private repos:
-
-```bash
-gh api "repos/NSXBet/wiz-cursor/contents/install.sh?ref=main" --jq '.content' | base64 -d | bash
-```
-
-> **Note**: Requires GitHub CLI (`gh`) to be installed and authenticated. Install from [cli.github.com](https://cli.github.com/)
-
-**Method 2: Using `curl`** - Works for public repositories:
+**Using `curl`** (works for public repositories):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/main/install.sh | bash
@@ -39,19 +211,13 @@ cat install.sh
 bash install.sh
 ```
 
-**Method 3: Manual installation** - Clone and copy `.cursor` directory:
+**Using GitHub CLI (`gh`)** (works for both public and private repos):
 
 ```bash
-# Clone just the .cursor directory using sparse checkout
-PROJECT_DIR=$(pwd)
-git clone --depth 1 --branch main --filter=blob:none --sparse https://github.com/NSXBet/wiz-cursor.git /tmp/wiz-install
-cd /tmp/wiz-install
-git sparse-checkout init --cone
-git sparse-checkout set .cursor
-cp -r .cursor "$PROJECT_DIR"
-cd "$PROJECT_DIR"
-rm -rf /tmp/wiz-install
+gh api "repos/NSXBet/wiz-cursor/contents/install.sh?ref=main" --jq '.content' | base64 -d | bash
 ```
+
+> **Note**: Requires GitHub CLI (`gh`) to be installed and authenticated. Install from [cli.github.com](https://cli.github.com/)
 
 The install script automatically tries multiple installation methods:
 1. **Git sparse checkout** (most efficient, works for public/private repos with git access)
@@ -65,7 +231,23 @@ The script will:
 - Clean up temporary files automatically
 - Provide helpful error messages if all methods fail
 
-#### Option 2: Alternative Manual Installation
+### Method 2: Manual Installation with Git Sparse Checkout
+
+Clone just the `.cursor` directory using sparse checkout:
+
+```bash
+# Clone just the .cursor directory using sparse checkout
+PROJECT_DIR=$(pwd)
+git clone --depth 1 --branch main --filter=blob:none --sparse https://github.com/NSXBet/wiz-cursor.git /tmp/wiz-install
+cd /tmp/wiz-install
+git sparse-checkout init --cone
+git sparse-checkout set .cursor
+cp -r .cursor "$PROJECT_DIR"
+cd "$PROJECT_DIR"
+rm -rf /tmp/wiz-install
+```
+
+### Method 3: Full Repository Clone
 
 If you prefer to clone the entire repository:
 
@@ -78,171 +260,84 @@ cd wiz-cursor
 cp -r .cursor /path/to/your/project/
 ```
 
-### Your First Project
+## Agents
 
-```bash
-# 1. Create a Product Requirements Document (PRD)
-/wiz-prd my-feature "Add user authentication with JWT tokens"
+Wiz uses specialized agents for different tasks. Each agent is a read-only consultant that provides guidance and recommendations—they do not implement code themselves.
 
-# 2. Answer the clarifying questions that Wiz asks
-# (Wiz will wait for your answers)
+**Core Agents:**
+- **wiz-planner**: Strategic planning and research specialist - generates PRDs, phases, and milestones with research-backed recommendations
+- **wiz-reviewer**: Quality assurance and NFR compliance auditor - reviews milestones and phases for quality and completeness
+- **wiz-milestone-analyst**: Strategic gatekeeper for auto-execution - determines when milestones need human input vs. can proceed automatically
 
-# 3. Generate implementation phases
-/wiz-phases my-feature
-
-# 4. Generate detailed milestones
-/wiz-milestones my-feature
-
-# 5. Start implementing!
-/wiz-next
-```
-
-## 📖 What is Wiz?
-
-Wiz Planner helps you:
-
-- **Plan**: Break down complex features into structured phases and ~1-hour milestones
-- **Execute**: Systematically implement milestones with quality gates
-- **Review**: Validate completed work against acceptance criteria
-- **Track**: Monitor progress across phases and milestones
-
-### Key Concepts
-
-- **PRD (Product Requirements Document)**: Comprehensive specification of your feature
-- **Phases**: Major blocks of work (typically 3-5 days each)
-- **Milestones**: Small, focused tasks (~1 hour each) with clear acceptance criteria
-- **Quality Gates**: Automatic checks for tests, linting, security, and code quality
-
-## 🎯 Core Workflow
-
-### 1. Planning Phase
-
-**Create PRD** (`/wiz-prd`)
-- Wiz asks clarifying questions about your idea
-- You provide answers
-- Wiz generates a comprehensive PRD with research-backed recommendations
-
-**Generate Phases** (`/wiz-phases`)
-- Wiz breaks down the PRD into logical implementation phases
-- Each phase has clear goals and dependencies
-
-**Generate Milestones** (`/wiz-milestones`)
-- Wiz creates detailed ~1-hour milestones for each phase
-- Each milestone has specific acceptance criteria
-
-### 2. Execution Phase
-
-**Execute Next Milestone** (`/wiz-next`)
-- Wiz finds the next TODO milestone
-- Implements it completely (code, tests, docs)
-- Runs quality checks (tests, linting)
-- Creates a commit when done
-
-**Auto-Execute** (`/wiz-auto`)
-- Automatically executes multiple milestones in sequence
-- Stops for human input when needed (via milestone analyst)
-- Perfect for batch implementation
-
-**Resume Work** (`/wiz-resume`)
-- Resume interrupted milestone work
-- Pick up where you left off
-
-### 3. Review Phase
-
-**Review Milestone** (`/wiz-review-milestone`)
-- Comprehensive quality audit of a completed milestone
-- Verifies acceptance criteria
-- Checks NFR compliance (security, observability, etc.)
-
-**Review Phase** (`/wiz-review-phase`)
-- Reviews an entire completed phase
-- Verifies integration and phase-level goals
-
-**Validate All** (`/wiz-validate-all`)
-- Full codebase validation
-- Checks tests, linting, security across entire project
-
-### 4. Tracking
-
-**Status Dashboard** (`/wiz-status`)
-- View progress across all phases
-- See milestone statistics (TODO, IN_PROGRESS, COMPLETE)
-- Track time estimates
-
-## 🛠️ Commands Reference
-
-### Planning Commands
-
-| Command                    | Description                        |
-| -------------------------- | ---------------------------------- |
-| `/wiz-prd <slug> "<idea>"` | Generate PRD from idea             |
-| `/wiz-phases <slug>`       | Break PRD into phases              |
-| `/wiz-milestones <slug>`   | Generate milestones for all phases |
-
-### Execution Commands
-
-| Command            | Description                 |
-| ------------------ | --------------------------- |
-| `/wiz-next [slug]` | Execute next TODO milestone |
-| `/wiz-auto [slug]` | Auto-execute milestones     |
-| `/wiz-resume`      | Resume interrupted work     |
-
-### Review Commands
-
-| Command                             | Description               |
-| ----------------------------------- | ------------------------- |
-| `/wiz-review-milestone <slug> <id>` | Review specific milestone |
-| `/wiz-review-phase <slug> <n>`      | Review completed phase    |
-| `/wiz-validate-all`                 | Validate entire codebase  |
-
-### Utility Commands
-
-| Command               | Description            |
-| --------------------- | ---------------------- |
-| `/wiz-status`         | Show project progress  |
-| `/wiz-help [command]` | Show help for commands |
-
-For detailed documentation on each command, see [docs/commands.md](./docs/commands.md).
-
-## 🤖 Agents
-
-Wiz uses specialized agents for different tasks:
-
-- **wiz-planner**: Strategic planning and research
-- **wiz-reviewer**: Quality assurance and NFR checking
-- **wiz-milestone-analyst**: Gatekeeper for auto-execution
-- **Language Specialists**: Go, TypeScript, Python, C#, Java, Docker expertise
+**Language Specialists:**
+- **wiz-go-specialist**: Go language consultant for Effective Go patterns, testing, and preferred stack guidance
+- **wiz-typescript-specialist**: TypeScript/JavaScript consultant for React, Node.js, and modern patterns
+- **wiz-python-specialist**: Python consultant for Pythonic patterns, pytest, and framework guidance
+- **wiz-csharp-specialist**: C# and .NET consultant for ASP.NET Core and Entity Framework patterns
+- **wiz-java-specialist**: Java consultant for Spring Boot, Hibernate/JPA, and modern Java patterns
+- **wiz-docker-specialist**: Docker specialist for Dockerfile best practices, security, and optimization
 
 For detailed documentation on each agent, see [docs/agents.md](./docs/agents.md).
 
-## 💡 Best Practices
+## Commands
+
+**Planning Commands:**
+- `/wiz-prd <slug> "<idea>"` - Generate Product Requirements Document from an idea through guided Q&A
+- `/wiz-phases <slug>` - Break PRD into logical implementation phases (~3-5 days each)
+- `/wiz-milestones <slug>` - Generate detailed ~1-hour milestones for all phases
+
+**Execution Commands:**
+- `/wiz-next [slug] [count]` - Execute the next TODO milestone with quality gates and automatic commits
+- `/wiz-auto [slug] [max-milestones]` - Auto-execute milestones with intelligent gating (stops for human input when needed)
+- `/wiz-resume` - Resume interrupted milestone work from where you left off
+
+**Review Commands:**
+- `/wiz-review-milestone <slug> <id>` - Comprehensive quality audit of a completed milestone
+- `/wiz-review-phase <slug> <n>` - Review an entire completed phase for integration and quality
+- `/wiz-validate-all` - Validate entire codebase for tests, linting, security, and quality
+
+**Utility Commands:**
+- `/wiz-status` - Display project progress dashboard with milestone statistics
+- `/wiz-help [command]` - Show help for Wiz Planner commands
+
+For detailed documentation on each command, see [docs/commands.md](./docs/commands.md).
+
+## Best Practices
 
 ### Using Composer1
 
-We recommend using **Composer1** (not Composer2) with Cursor 2.0+ for the best experience. Composer1 provides:
+We strongly recommend using **Composer1** (not Composer2) with Cursor 2.0+ for the best Wiz experience. Composer1 provides:
 - Better context awareness for Wiz commands
 - More reliable agent invocation
 - Improved file writing capabilities
 
-### Workflow Tips
+To switch to Composer1 in Cursor:
+1. Open Cursor Settings
+2. Search for "Composer"
+3. Select "Composer1" as your composer mode
 
-1. **Start Small**: Begin with a simple feature to learn the workflow
-2. **Review PRDs**: Always review the generated PRD before proceeding to phases
-3. **Check Status**: Use `/wiz-status` frequently to track progress
-4. **Review Milestones**: Review completed milestones before moving to the next phase
-5. **Quality First**: Wiz enforces quality gates - fix issues as they arise
+### How to Best Use Wiz
+
+1. **Start Small**: Begin with a simple feature to learn the workflow before tackling complex projects
+2. **Review PRDs**: Always review the generated PRD before proceeding to phases - refine if needed
+3. **Check Status Frequently**: Use `/wiz-status` to track progress and identify bottlenecks
+4. **Review Milestones**: Review completed milestones before moving to the next phase to catch issues early
+5. **Quality First**: Wiz enforces quality gates - fix issues as they arise, don't accumulate technical debt
+6. **Use `/wiz-auto` Wisely**: Great for batch work, but review milestones when the analyst halts for input
+7. **Iterate on Plans**: Don't hesitate to regenerate phases or milestones if the plan doesn't match your needs
+8. **Leverage Language Specialists**: They provide expert guidance automatically - pay attention to their recommendations
 
 ### Quality Standards
 
-Wiz enforces strict quality standards:
+Wiz enforces strict quality standards with zero tolerance:
 
-- ✅ **P0: Correctness** - Code must work
-- ✅ **P1: Tests** - All tests must pass (no failures, no skips)
+- ✅ **P0: Correctness** - Code must work, handle edge cases
+- ✅ **P1: Tests** - All tests must pass (zero failures, zero skips)
 - ✅ **P2: Security** - Input validation, no secrets, secure practices
 - ✅ **P3: Quality** - Lint-clean, documented, maintainable
 - ✅ **P4: Performance** - Meets performance requirements
 
-**Zero tolerance**: No failing tests, no lint errors, no skipped tests.
+**Zero tolerance policy**: No failing tests, no lint errors, no skipped tests. The entire codebase must be healthy, not just new code.
 
 ## 📁 Project Structure
 
@@ -262,69 +357,6 @@ Wiz creates a `.wiz/` directory in your project root:
 │       └── ...
 ├── state.json                 # Current project state
 └── .current-milestone.json   # Resume state (if interrupted)
-```
-
-## 🔍 How It Works
-
-### Planning Stage
-
-1. **PRD Creation**: Wiz analyzes your codebase, asks clarifying questions, researches best practices, and generates a comprehensive PRD
-2. **Phase Decomposition**: Wiz breaks the PRD into 3-15 logical phases (each ~3-5 days)
-3. **Milestone Generation**: Wiz creates 15-40 milestones per phase (each ~1 hour)
-
-### Execution Stage
-
-1. **Milestone Selection**: Wiz finds the next TODO milestone
-2. **Implementation**: Wiz implements the milestone (code, tests, docs)
-3. **Quality Checks**: Automatic tests, linting, security checks
-4. **Specialist Review**: Language specialists review for best practices
-5. **Commit**: Creates a properly formatted commit
-6. **Status Update**: Marks milestone as COMPLETE
-
-### Review Stage
-
-1. **Criteria Verification**: Checks each acceptance criterion
-2. **Code Quality**: Reviews implementation against standards
-3. **NFR Compliance**: Verifies security, observability, reliability, documentation
-4. **Report Generation**: Creates detailed review report
-
-## 🎓 Examples
-
-### Example: Adding Authentication
-
-```bash
-# 1. Create PRD
-/wiz-prd auth-system "Add JWT-based authentication"
-
-# Answer questions about:
-# - User registration flow
-# - Token expiration
-# - OAuth providers
-# - Security requirements
-
-# 2. Generate phases
-/wiz-phases auth-system
-
-# Result: Phases like:
-# - Phase 1: User model and database schema
-# - Phase 2: JWT token generation and validation
-# - Phase 3: Authentication middleware
-# - Phase 4: Login/logout endpoints
-# - Phase 5: Testing and documentation
-
-# 3. Generate milestones
-/wiz-milestones auth-system
-
-# Result: ~1-hour milestones like:
-# - P01M01: Create User model struct
-# - P01M02: Add database migration
-# - P02M01: Implement JWT token generation
-# ...
-
-# 4. Execute
-/wiz-next
-
-# Wiz implements P01M01, runs tests, commits, then moves to P01M02
 ```
 
 ## 🐛 Troubleshooting
@@ -352,25 +384,52 @@ Wiz creates a `.wiz/` directory in your project root:
 
 - **[Commands Documentation](./docs/commands.md)** - Detailed command reference
 - **[Agents Documentation](./docs/agents.md)** - Agent capabilities and roles
-- **[.cursor/README.md](./.cursor/README.md)** - Technical details and structure
 
-## 🤝 Contributing
+## Contributing
 
-Wiz is designed to be extensible. To add new features:
+Wiz is designed to be extensible and welcomes contributions! Here's how you can help:
 
-1. Add command files to `.cursor/commands/`
-2. Add agent files to `.cursor/agents/`
-3. Follow existing patterns for consistency
+### Adding New Commands
 
-## 📝 License
+1. Create a new command file in `.cursor/commands/`
+2. Follow the existing command pattern with YAML frontmatter
+3. Include comprehensive documentation and examples
+4. Test your command thoroughly
 
-[Add your license information here]
+### Adding New Agents
 
-## 🙏 Acknowledgments
+1. Create a new agent file in `.cursor/agents/`
+2. Define the agent's role, responsibilities, and capabilities
+3. Document when and how the agent is used
+4. Update `docs/agents.md` with agent documentation
 
-Wiz Planner helps you write better code, faster, with confidence.
+### Reporting Issues
+
+Found a bug or have a feature request? Please open an issue on GitHub with:
+- Clear description of the problem or feature
+- Steps to reproduce (for bugs)
+- Expected vs. actual behavior
+
+### Improving Documentation
+
+Documentation improvements are always welcome! Whether it's:
+- Fixing typos or clarifying explanations
+- Adding examples or use cases
+- Improving code comments
+
+### Code Style
+
+- Follow existing patterns and conventions
+- Ensure all tests pass
+- Update documentation when adding features
+- Keep commits clear and focused
+
+For more details, see the existing command and agent files as examples.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE.md](LICENSE.md) file for details.
 
 ---
 
 **Happy Planning! 🎯**
-
