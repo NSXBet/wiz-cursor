@@ -11,7 +11,7 @@ NC := \033[0m # No Color
 
 # Directories and files
 BASH_FILES := install.sh run-tests.sh test-install.bats
-MARKDOWN_FILES := $(shell find . -name '*.md' -not -path './.git/*' -not -path './node_modules/*')
+MARKDOWN_FILES := $(shell find . -name '*.md' -not -path './.git/*' -not -path './node_modules/*' -not -path './.cursor/*')
 TEST_FILE := test-install.bats
 
 help: ## Show this help message
@@ -77,25 +77,15 @@ lint-bash: ## Lint bash scripts with shellcheck
 		exit 1; \
 	fi
 
-lint-markdown: ## Lint markdown files with markdownlint
+lint-markdown: ## Lint markdown files with markdownlint (via npx)
 	@echo "$(BLUE)Linting markdown files...$(NC)"
-	@if command -v markdownlint >/dev/null 2>&1; then \
-		markdownlint $(MARKDOWN_FILES) || exit 1; \
+	@if command -v npx >/dev/null 2>&1; then \
+		npx --yes markdownlint-cli $(MARKDOWN_FILES) || exit 1; \
 		echo "$(GREEN)✓ Markdown linting passed$(NC)"; \
-	elif command -v npm >/dev/null 2>&1; then \
-		if [ -f "node_modules/.bin/markdownlint-cli" ]; then \
-			./node_modules/.bin/markdownlint-cli $(MARKDOWN_FILES) || exit 1; \
-			echo "$(GREEN)✓ Markdown linting passed$(NC)"; \
-		else \
-			echo "$(YELLOW)⚠ markdownlint not found. Install with:$(NC)"; \
-			echo "  npm install -g markdownlint-cli"; \
-			echo "  or run: make install-tools"; \
-			exit 1; \
-		fi; \
 	else \
-		echo "$(YELLOW)⚠ markdownlint not installed. Install with:$(NC)"; \
-		echo "  npm install -g markdownlint-cli"; \
-		echo "  or run: make install-tools"; \
+		echo "$(YELLOW)⚠ npx not installed. Install with:$(NC)"; \
+		echo "  npm comes with Node.js - install Node.js from https://nodejs.org/"; \
+		echo "  or: brew install node"; \
 		exit 1; \
 	fi
 
@@ -161,14 +151,14 @@ install-tools: ## Install linting and testing tools
 		brew install shellcheck || true; \
 		echo "Installing bats-core..."; \
 		brew install bats-core || true; \
-		echo "Installing markdownlint-cli..."; \
-		npm install -g markdownlint-cli || true; \
 		echo "$(GREEN)✓ Tools installed$(NC)"; \
+		echo ""; \
+		echo "Note: markdownlint-cli is run via npx (no installation needed)"; \
 	else \
 		echo "$(YELLOW)⚠ Homebrew not found. Please install tools manually:$(NC)"; \
 		echo "  shellcheck: https://github.com/koalaman/shellcheck"; \
 		echo "  bats-core: https://github.com/bats-core/bats-core"; \
-		echo "  markdownlint-cli: npm install -g markdownlint-cli"; \
+		echo "  uv: Install from https://github.com/astral-sh/uv"; \
 	fi
 
 check-tools: ## Check if required tools are installed
@@ -185,8 +175,20 @@ check-tools: ## Check if required tools are installed
 	else \
 		echo "$(YELLOW)✗ not installed$(NC)"; \
 	fi
-	@printf "markdownlint: "; \
-	if command -v markdownlint >/dev/null 2>&1 || command -v npm >/dev/null 2>&1; then \
+	@printf "npx: "; \
+	if command -v npx >/dev/null 2>&1; then \
+		echo "$(GREEN)✓ installed$(NC)"; \
+	else \
+		echo "$(YELLOW)✗ not installed$(NC)"; \
+	fi
+	@printf "uvx: "; \
+	if command -v uvx >/dev/null 2>&1 || command -v uv >/dev/null 2>&1; then \
+		echo "$(GREEN)✓ installed$(NC)"; \
+	else \
+		echo "$(YELLOW)✗ not installed$(NC)"; \
+	fi
+	@printf "shfmt: "; \
+	if command -v shfmt >/dev/null 2>&1; then \
 		echo "$(GREEN)✓ installed$(NC)"; \
 	else \
 		echo "$(YELLOW)✗ not installed$(NC)"; \

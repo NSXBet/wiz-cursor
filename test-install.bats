@@ -151,19 +151,27 @@ setup() {
 
 # Test: parse_args
 @test "parse_args with --version flag" {
+    # shellcheck disable=SC2030,SC2031
     parse_args --version "v1.0.0"
     [ "$VERSION" = "v1.0.0" ]
+    # shellcheck disable=SC2030
     VERSION=""
 }
 
 @test "parse_args with --version= syntax" {
+    # shellcheck disable=SC2030,SC2031
     parse_args --version=v2.0.0
+    # shellcheck disable=SC2031
     [ "$VERSION" = "v2.0.0" ]
+    # shellcheck disable=SC2030
     VERSION=""
 }
 
 @test "parse_args with HEAD" {
+    # shellcheck disable=SC2030,SC2031
     parse_args --version HEAD
+    # shellcheck disable=SC2031
     [ "$VERSION" = "HEAD" ]
+    # shellcheck disable=SC2030
     VERSION=""
 }

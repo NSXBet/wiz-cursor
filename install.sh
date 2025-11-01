@@ -144,8 +144,8 @@ check_wiz_installed() {
 
     if [[ -d ".cursor/agents" ]] || [[ -d ".cursor/commands" ]]; then
         # Check if there are Wiz-specific files
-        if [[ -n "$(find .cursor/agents -name 'wiz-*.md' 2>/dev/null 2>/dev/null)" ]] ||
-            [[ -n "$(find .cursor/commands -name 'wiz-*.md' 2>/dev/null 2>/dev/null)" ]]; then
+        if [[ -n "$(find .cursor/agents -name 'wiz-*.md' 2>/dev/null)" ]] ||
+            [[ -n "$(find .cursor/commands -name 'wiz-*.md' 2>/dev/null)" ]]; then
             WIZ_INSTALLED=true
         fi
     fi
@@ -272,8 +272,7 @@ install_tarball() {
     fi
 
     local github_info
-    github_info=$(extract_github_info "$repo_url")
-    if [[ $? -ne 0 ]]; then
+    if ! github_info=$(extract_github_info "$repo_url"); then
         return 1
     fi
 
@@ -318,7 +317,7 @@ perform_installation() {
 
     local temp_dir
     temp_dir=$(mktemp -d)
-    trap "rm -rf $temp_dir" EXIT
+    trap 'rm -rf "$temp_dir"' EXIT
 
     # Try git sparse checkout first
     if install_git_sparse_checkout "$repo_url" "$ref" "$ref_type" "$temp_dir"; then
