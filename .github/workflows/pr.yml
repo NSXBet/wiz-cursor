@@ -35,10 +35,22 @@ jobs:
 
       - name: Install shfmt
         run: |
+          SHFMT_VERSION=$(curl -sL https://api.github.com/repos/mvdan/sh/releases/latest | grep -o '"tag_name": "[^"]*"' | cut -d'"' -f4)
+          if [ -z "$SHFMT_VERSION" ]; then
+            echo "Failed to fetch shfmt version, using fallback"
+            SHFMT_VERSION="v3.12.0"
+          fi
+          SHFMT_VERSION=${SHFMT_VERSION#v}  # Remove 'v' prefix
+          echo "Installing shfmt version ${SHFMT_VERSION}"
           wget -q -O shfmt \
-            https://github.com/mvdan/sh/releases/latest/download/shfmt_v3.7.0_linux_amd64
+            "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64"
+          if [ ! -f shfmt ]; then
+            echo "Failed to download shfmt"
+            exit 1
+          fi
           chmod +x shfmt
           sudo mv shfmt /usr/local/bin/
+          shfmt --version
 
       - name: Check formatting
         run: |
