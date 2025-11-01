@@ -5,7 +5,7 @@
 ## Installing
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash
 ```
 
 For further installation instructions, see [Installation Instructions](#installation-instructions).
@@ -19,7 +19,7 @@ To update Wiz to the latest version, simply run the installation command again:
 gh api "repos/NSXBet/wiz-cursor/contents/install.sh?ref=main" --jq '.content' | base64 -d | bash
 
 # Or using curl
-curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash
 ```
 
 The script automatically detects existing installations and updates them without asking for confirmation.
@@ -212,14 +212,14 @@ There are several ways to install Wiz in your project for Cursor:
 **Using `curl`** (works for public repositories):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash
 ```
 
 **Or download and review the script first** (recommended for security):
 
 ```bash
 # Download the script
-curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/main/install.sh -o install.sh
+curl -fsSL https://raw.githubusercontent.com/NSXBet/wiz-cursor/refs/heads/main/install.sh | bash
 # Review the script
 cat install.sh
 # Then run it
