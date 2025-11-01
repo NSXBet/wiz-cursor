@@ -1,6 +1,46 @@
+<div align="center">
+
+<img src="./wiz-logo.png" alt="Wiz Planner Logo" width="320" style="max-width:100%; display:block; margin:auto;" />
+
 # Wiz Planner for Cursor
 
+**Your AI Project Manager for Cursor**
+
+Turn brilliant ideas into shipped code with AI-powered planning, execution, and quality gates.
+
+[![Status](https://img.shields.io/badge/status-alpha--ready-yellow)]()
+[![Tests](https://img.shields.io/badge/tests-93.8%25%20passing-brightgreen)]()
+[![Documentation](https://img.shields.io/badge/docs-comprehensive-blue)]()
+[![License](https://img.shields.io/badge/license-MIT-green)]()
+
+[Quick Start](#-quick-start) • [Documentation](#-documentation) • [Installation](#-installation) • [Contributing](#-contributing)
+
+</div>
+
+---
+
+> **🐛 Found a bug?** [Report it here](https://github.com/NSXBet/wiz-cursor/issues/new/choose) - we have quick 2-minute templates!
+>
+> **💬 Have questions?** Check [Discussions](https://github.com/NSXBet/wiz-cursor/discussions) or ask in the community.
+
+---
+
+## ✨ Why Wiz?
+
 **Wiz** is an intelligent project planning and execution system that works seamlessly with Cursor to help you break down complex features into manageable milestones and execute them systematically.
+
+Stop wondering "where do I even start?" - Wiz transforms vague ideas into shipped code:
+
+- **📋 Auto-Planning** - Generates comprehensive PRDs through AI research and Q&A
+- **🎯 Structured Execution** - Breaks work into phases and milestones, always knows what's next
+- **🛡️ Quality Enforced** - Mandatory code review + tests + linting + security on every change
+- **🌍 Multi-Language** - Go, TypeScript, Python, C#, Java + Docker with language-specific best practices
+- **🔄 Never Lose Work** - Resume exactly where you left off after interruptions
+- **📝 Professional Commits** - Narrative messages with Why/What/How/Tests/NFR/Acceptance
+
+**Think of it as a senior engineer who never gets tired, always follows best practices, and actually enjoys documentation!** 🚀
+
+---
 
 ## Installing
 
