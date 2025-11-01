@@ -479,12 +479,179 @@ Wiz creates a `.wiz/` directory in your project root:
 
 Wiz is designed to be extensible and welcomes contributions! Here's how you can help:
 
+### Development Setup
+
+Before contributing, set up your development environment:
+
+```bash
+# Install required tools
+make setup          # Install bats-core and shellcheck
+make setup-format   # Install shfmt (mdformat runs via uvx)
+
+# Verify all tools are installed
+make check-tools
+```
+
+### Development Commands
+
+The project uses a `Makefile` for common development tasks:
+
+**Formatting:**
+
+```bash
+make format          # Format all files (bash + markdown)
+make format-bash     # Format bash scripts with shfmt
+make format-markdown # Format markdown files with mdformat
+```
+
+**Linting:**
+
+```bash
+make lint            # Run all linters (bash + markdown)
+make lint-bash       # Lint bash scripts with shellcheck
+make lint-markdown   # Lint markdown files with markdownlint-cli
+```
+
+**Testing:**
+
+```bash
+make test            # Run all tests with bats-core
+make test-verbose    # Run tests with verbose output
+```
+
+**All-in-one:**
+
+```bash
+make all             # Run format, lint, and test in sequence
+```
+
+**Help:**
+
+```bash
+make help            # Show all available make targets
+```
+
+### Workflow Before Committing
+
+Before committing your changes, ensure everything passes:
+
+```bash
+# 1. Format your code
+make format
+
+# 2. Verify formatting (should show no changes)
+git status
+
+# 3. Run linting
+make lint
+
+# 4. Run tests
+make test
+
+# 5. If everything passes, commit your changes
+git add .
+git commit -m "your commit message"
+```
+
+**Or use the all-in-one command:**
+
+```bash
+make all
+```
+
+### Creating a Pull Request
+
+Follow these steps to create a PR:
+
+1. **Fork the repository** (if you haven't already)
+
+1. **Clone your fork** and set up the upstream:
+
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/wiz-cursor.git
+   cd wiz-cursor
+   git remote add upstream https://github.com/NSXBet/wiz-cursor.git
+   ```
+
+1. **Create a feature branch**:
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   # or
+   git checkout -b fix/your-bug-fix
+   ```
+
+1. **Make your changes**:
+
+   - Edit files as needed
+   - Follow existing code patterns and conventions
+   - Update documentation if adding features
+
+1. **Ensure code quality**:
+
+   ```bash
+   # Format, lint, and test
+   make all
+
+   # Verify git diff is clean after formatting
+   git status
+   ```
+
+1. **Commit your changes**:
+
+   ```bash
+   git add .
+   git commit -m "feat: add your feature description"
+   ```
+
+   Use conventional commit messages:
+
+   - `feat:` for new features
+   - `fix:` for bug fixes
+   - `docs:` for documentation changes
+   - `refactor:` for code refactoring
+   - `test:` for test changes
+
+1. **Push to your fork**:
+
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+1. **Create a Pull Request**:
+
+   - Go to https://github.com/NSXBet/wiz-cursor
+   - Click "New Pull Request"
+   - Select your branch
+   - Fill out the PR template with:
+     - Description of changes
+     - Why this change is needed
+     - How it was tested
+     - Any breaking changes
+
+1. **Wait for CI checks**:
+
+   - The PR will automatically run:
+     - Format check (fails if code needs formatting)
+     - Bash linting (shows all shellcheck errors)
+     - Markdown linting (shows all markdownlint errors)
+     - Tests (shows test results)
+   - All checks must pass before the PR can be merged
+   - Review the GitHub Actions summary for any failures
+
+1. **Address feedback**:
+
+   - Make requested changes
+   - Push updates to your branch
+   - The PR will automatically update
+
 ### Adding New Commands
 
 1. Create a new command file in `.cursor/commands/`
 1. Follow the existing command pattern with YAML frontmatter
 1. Include comprehensive documentation and examples
 1. Test your command thoroughly
+1. Run `make all` before committing
 
 ### Adding New Agents
 
@@ -492,6 +659,7 @@ Wiz is designed to be extensible and welcomes contributions! Here's how you can 
 1. Define the agent's role, responsibilities, and capabilities
 1. Document when and how the agent is used
 1. Update `docs/agents.md` with agent documentation
+1. Run `make all` before committing
 
 ### Reporting Issues
 
@@ -500,6 +668,7 @@ Found a bug or have a feature request? Please open an issue on GitHub with:
 - Clear description of the problem or feature
 - Steps to reproduce (for bugs)
 - Expected vs. actual behavior
+- Environment details (OS, Cursor version, etc.)
 
 ### Improving Documentation
 
@@ -509,12 +678,29 @@ Documentation improvements are always welcome! Whether it's:
 - Adding examples or use cases
 - Improving code comments
 
+**Remember to run:**
+
+```bash
+make lint-markdown   # Check markdown formatting
+make format-markdown # Auto-format markdown files
+```
+
 ### Code Style
 
 - Follow existing patterns and conventions
-- Ensure all tests pass
+- Ensure all tests pass (`make test`)
+- Run linting (`make lint`) and fix all errors
+- Format code before committing (`make format`)
 - Update documentation when adding features
 - Keep commits clear and focused
+- Use conventional commit messages
+
+**Important:** All PRs must pass CI checks:
+
+- ✅ Format check (no unformatted code)
+- ✅ Bash linting (no shellcheck errors)
+- ✅ Markdown linting (no markdownlint errors)
+- ✅ Tests (all tests passing)
 
 For more details, see the existing command and agent files as examples.
 

@@ -80,7 +80,11 @@ lint-bash: ## Lint bash scripts with shellcheck
 lint-markdown: ## Lint markdown files with markdownlint (via npx)
 	@echo "$(BLUE)Linting markdown files...$(NC)"
 	@if command -v npx >/dev/null 2>&1; then \
-		npx --yes markdownlint-cli $(MARKDOWN_FILES) || exit 1; \
+		if [ -f .markdownlint.json ]; then \
+			npx --yes markdownlint-cli --config .markdownlint.json $(MARKDOWN_FILES) || exit 1; \
+		else \
+			npx --yes markdownlint-cli $(MARKDOWN_FILES) || exit 1; \
+		fi; \
 		echo "$(GREEN)✓ Markdown linting passed$(NC)"; \
 	else \
 		echo "$(YELLOW)⚠ npx not installed. Install with:$(NC)"; \
