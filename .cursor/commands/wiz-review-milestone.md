@@ -1,7 +1,6 @@
----
-description: Review and audit a specific milestone
-argument-hint: "<slug> <milestone-id>"
----
+______________________________________________________________________
+
+## description: Review and audit a specific milestone argument-hint: "<slug> <milestone-id>"
 
 # Review Milestone Implementation
 
@@ -19,6 +18,7 @@ This command delegates detailed audit to the **wiz-reviewer** agent (`.cursor/ag
 ## Command Overview
 
 This command performs deep audit of a single milestone:
+
 - Verifies all acceptance criteria
 - Checks code quality and implementation
 - Validates test coverage
@@ -280,18 +280,21 @@ echo ""
 Agents invoked via agent references **cannot reliably write files**. This is a known limitation.
 
 **Solution:**
+
 - The `wiz-reviewer` agent **returns audit report content** as markdown code blocks in its response
 - The main agent (you, running /wiz:review-milestone) **performs all Write operations**
 - Agent focuses on: audit analysis, findings, recommendations
 - Main agent handles: all file I/O operations
 
 **Workflow:**
+
 1. Reference `.cursor/agents/wiz-reviewer.md` with the prompt template below
-2. Agent returns audit report as markdown in code blocks
-3. Main agent writes the audit report file using Write tool
-4. Main agent displays summary to user
+1. Agent returns audit report as markdown in code blocks
+1. Main agent writes the audit report file using Write tool
+1. Main agent displays summary to user
 
 **Prompt Template**:
+
 ```
 Audit milestone: {MILESTONE_ID}
 
@@ -324,8 +327,10 @@ Perform a detailed audit of this milestone:
 
 For each acceptance criterion:
 ```
+
 {ACCEPTANCE_CRITERIA}
-```
+
+````
 
 Verify each criterion:
 - [ ] Find evidence in code that criterion is met
@@ -426,9 +431,10 @@ Generate a detailed audit report. Return the complete report as a markdown code 
 **Code Examples** (if issues found):
 ```language
 [Example of problematic code]
-```
+````
 
 **Suggested Fix**:
+
 ```language
 [Improved version]
 ```
@@ -438,53 +444,64 @@ Generate a detailed audit report. Return the complete report as a markdown code 
 **Coverage**: [Percentage if available]
 
 **Test Files**:
+
 - `path/to/test1.test.ext`
 - `path/to/test2.test.ext`
 
 **Test Quality**: Excellent / Good / Fair / Poor
 
 **Gaps**:
+
 - [Missing test case 1]
 - [Missing test case 2]
 
 ## NFR Compliance
 
 ### P0 - Correctness: ✅ Pass / ⚠️ Warning / ❌ Fail
+
 [Details]
 
 ### P1 - Tests: ✅ Pass / ⚠️ Warning / ❌ Fail
+
 [Details]
 
 ### P2 - Security: ✅ Pass / ⚠️ Warning / ❌ Fail
+
 [Details]
 
 ### P3 - Quality: ✅ Pass / ⚠️ Warning / ❌ Fail
+
 [Details]
 
 ### P4 - Performance: ✅ Pass / ⚠️ Warning / ❌ Fail
+
 [Details]
 
 ## Findings
 
 ### Critical Issues
+
 - [Critical issue requiring immediate fix]
 
 ### Warnings
+
 - [Warning that should be addressed]
 
 ### Suggestions
+
 - [Suggestion for improvement]
 
 ## Recommendations
 
 1. [Specific actionable recommendation with code example]
-2. [Another recommendation]
+1. [Another recommendation]
 
 ## Conclusion
 
 **Overall Assessment**: PASS / PASS WITH WARNINGS / FAIL
 
 [Final summary and next steps]
+
 ```
 
 ## Output
@@ -569,5 +586,3 @@ Recommended actions:
 - Can be run independently of phase review
 - Useful for quality assurance during development
 - Agent returns report as markdown code block, main agent writes file
-
-

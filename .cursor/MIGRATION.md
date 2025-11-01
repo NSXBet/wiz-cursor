@@ -13,6 +13,7 @@ This document details the conversion of Wiz Planner from Claude Code plugin form
 ### Commands
 
 **Claude Code Format:**
+
 ```yaml
 ---
 description: Command description
@@ -24,6 +25,7 @@ argument-hint: "<arg1> [arg2]"
 ```
 
 **Cursor Format:**
+
 - Same markdown structure
 - YAML frontmatter preserved (may need adaptation)
 - Scripts inlined (no `source` statements)
@@ -32,6 +34,7 @@ argument-hint: "<arg1> [arg2]"
 ### Agents
 
 **Claude Code Format:**
+
 ```yaml
 ---
 name: "agent-name"
@@ -45,6 +48,7 @@ model: "sonnet"
 ```
 
 **Cursor Format:**
+
 - Same markdown structure
 - YAML frontmatter preserved
 - Skills embedded directly in agent content
@@ -53,10 +57,12 @@ model: "sonnet"
 ### Skills
 
 **Claude Code Format:**
+
 - Separate files in `skills/*/SKILL.md`
 - Referenced by agents/commands
 
 **Cursor Format:**
+
 - **Embedded** directly in agent definitions
 - Quality gates → Language specialists
 - NFR checker → Reviewer agent
@@ -65,10 +71,12 @@ model: "sonnet"
 ### Scripts
 
 **Claude Code Format:**
+
 - Separate files in `scripts/utils/*.sh`
 - Referenced via `source "$SCRIPT_DIR/../scripts/utils/*.sh"`
 
 **Cursor Format:**
+
 - **Inlined** directly in commands where used
 - Functions extracted and placed inline
 - Path references updated
@@ -76,16 +84,19 @@ model: "sonnet"
 ### Hooks
 
 **Claude Code Format:**
+
 - `hooks/hooks.json` with JSON structure
 - Hook scripts referenced
 
 **Cursor Format:**
+
 - Cursor-specific hook format (to be determined)
 - Scripts inlined or adapted
 
 ## Conversion Checklist
 
 ### Agents (9 total)
+
 - [x] wiz-go-specialist (with embedded quality-gates-go)
 - [ ] wiz-typescript-specialist (with embedded quality-gates-typescript)
 - [ ] wiz-python-specialist (with embedded quality-gates-python)
@@ -97,6 +108,7 @@ model: "sonnet"
 - [ ] wiz-milestone-analyst
 
 ### Commands (13 total)
+
 - [ ] wiz-help
 - [ ] wiz-next
 - [ ] wiz-prd
@@ -112,15 +124,16 @@ model: "sonnet"
 - [ ] (skip test-subagent-filewriting.md)
 
 ### Hooks
+
 - [ ] Convert hooks.json to Cursor format
 - [ ] Adapt hook scripts
 
 ## Key Adaptations
 
 1. **Agent Invocation**: Claude Code uses `subagent_type: "wiz:agent-name"` → Cursor format TBD
-2. **Paths**: `${PLUGIN_ROOT}` → `.cursor/` relative paths
-3. **Scripts**: `source` statements → Inlined functions
-4. **Skills**: Separate files → Embedded sections in agents
+1. **Paths**: `${PLUGIN_ROOT}` → `.cursor/` relative paths
+1. **Scripts**: `source` statements → Inlined functions
+1. **Skills**: Separate files → Embedded sections in agents
 
 ## Known Issues
 
@@ -131,9 +144,9 @@ model: "sonnet"
 ## Testing
 
 After conversion, test:
+
 - [ ] All commands appear in Cursor (`/` menu)
 - [ ] Commands execute correctly
 - [ ] Agents are invoked properly
 - [ ] Scripts work when inlined
 - [ ] Hooks trigger appropriately
-

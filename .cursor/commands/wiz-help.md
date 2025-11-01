@@ -9,11 +9,13 @@ Show help for Wiz Planner commands.
 ## Usage
 
 Show quick help summary:
+
 ```
 /wiz-help
 ```
 
 Show help for specific command:
+
 ```
 /wiz-help wiz-next
 /wiz-help wiz-prd
@@ -23,6 +25,7 @@ Show help for specific command:
 ## Implementation
 
 This command provides help information by extracting documentation from command files. It can show:
+
 - Quick help summary for all commands
 - Detailed help for a specific command
 
@@ -33,6 +36,7 @@ When no command is specified, shows a summary of all available commands grouped 
 ### Command-Specific Help
 
 When a command name is provided, extracts and displays:
+
 - Description from YAML frontmatter
 - Usage information with argument hints
 - Examples from the command documentation
@@ -84,7 +88,7 @@ get_command_argument_hint() {
 
 ### Extracting Examples
 
-```bash
+````bash
 # Extract example usage from command file
 extract_examples() {
     local command_file="$1"
@@ -95,7 +99,7 @@ extract_examples() {
         sed 's/^[[:space:]]*//' | \
         grep '^/wiz-' || echo ""
 }
-```
+````
 
 ### Generating Help Text
 
@@ -288,11 +292,13 @@ exit 0
 ## Examples
 
 ### Show quick help
+
 ```
 /wiz-help
 ```
 
 Output:
+
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
 ║                    Wiz Planner Quick Help                            ║
@@ -305,11 +311,13 @@ Output:
 ```
 
 ### Show command-specific help
+
 ```
 /wiz-help wiz-next
 ```
 
 Output:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   /wiz-next
@@ -348,14 +356,14 @@ argument-hint: "<required-arg> [optional-arg]"
 ```
 
 The help system extracts:
+
 1. **Description** from `description` field
-2. **Arguments** from `argument-hint` field
-3. **Examples** by scanning for `/wiz-` commands in file
-4. **Options** by scanning for `--flag` patterns
+1. **Arguments** from `argument-hint` field
+1. **Examples** by scanning for `/wiz-` commands in file
+1. **Options** by scanning for `--flag` patterns
 
 ## See Also
 
 - `.cursor/README.md` - Overview and usage guide
 - `.cursor/MIGRATION.md` - Migration notes
 - Individual command files in `.cursor/commands/` directory
-

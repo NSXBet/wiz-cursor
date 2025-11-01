@@ -1,6 +1,6 @@
----
-description: Display project progress and milestone statistics
----
+______________________________________________________________________
+
+## description: Display project progress and milestone statistics
 
 # Project Status Dashboard
 
@@ -330,7 +330,7 @@ Next Milestone
 
 ## Performance
 
-- Status calculation: <1 second
+- Status calculation: \<1 second
 - Scales to hundreds of milestones efficiently
 - Uses grep for fast counting
 
@@ -343,4 +343,3 @@ Next Milestone
 - Current milestone displayed if in progress
 - Next milestone helps user know what to do
 - Command requires no arguments (uses state or `.wiz/.current-prd`)
-

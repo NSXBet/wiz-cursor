@@ -1,6 +1,6 @@
----
-description: "Run codebase-wide quality validation (auxiliary command)"
----
+______________________________________________________________________
+
+## description: "Run codebase-wide quality validation (auxiliary command)"
 
 # Validate Entire Codebase
 
@@ -9,12 +9,14 @@ description: "Run codebase-wide quality validation (auxiliary command)"
 ## Command Overview
 
 This command runs quality gates across the entire codebase:
+
 - Detects all programming languages used
 - Runs language-specific quality checks (lint, test, format, etc.)
 - Aggregates results across all languages
 - Generates comprehensive validation report
 
 Use this command to:
+
 - Perform periodic quality audits
 - Validate codebase before major releases
 - Check overall code health
@@ -561,5 +563,3 @@ Detailed report: .wiz/validation-report.md
 - Can be run at any time for code health check
 - Useful before releases or major milestones
 - Integrates with quality gate skills (Phase 4)
-
-

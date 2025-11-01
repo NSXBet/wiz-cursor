@@ -1,7 +1,6 @@
----
-description: Review and verify phase completion
-argument-hint: "<slug> <phase-number>"
----
+______________________________________________________________________
+
+## description: Review and verify phase completion argument-hint: "<slug> <phase-number>"
 
 # Review Phase Completion
 
@@ -19,6 +18,7 @@ This command delegates detailed review to the **wiz-reviewer** agent (`.cursor/a
 ## Command Overview
 
 This command performs comprehensive review of a phase to verify:
+
 - All milestones are complete
 - Functional requirements are met
 - NFR gates are satisfied (tests, lint, docs, benchmarks)
@@ -255,20 +255,22 @@ echo ""
 Agents invoked via agent references **cannot reliably write files**. This is a known limitation.
 
 **Solution:**
+
 - The `wiz-reviewer` agent **returns review report content** as markdown code blocks in its response
 - The main agent (you, running /wiz:review-phase) **performs all Write operations**
 - Agent focuses on: review analysis, findings, recommendations
 - Main agent handles: all file I/O operations
 
 **Workflow:**
+
 1. Reference `.cursor/agents/wiz-reviewer.md` with the prompt template below
-2. Agent returns review report as markdown in code blocks
-3. Main agent writes the review report file using Write tool
-4. Main agent displays summary to user
+1. Agent returns review report as markdown in code blocks
+1. Main agent writes the review report file using Write tool
+1. Main agent displays summary to user
 
 Reference the `.cursor/agents/wiz-reviewer.md` agent with the following prompt:
 
-```
+````
 Review phase completion: Phase {PHASE_NUMBER} of PRD {SLUG}
 
 ## Context
@@ -405,12 +407,13 @@ Generate a review report with the following structure. Return the complete repor
 ## Conclusion
 
 [Overall assessment: PASS / PASS WITH WARNINGS / FAIL]
-```
+````
 
 ## Output
 
 Return the complete review report as a markdown code block. The main agent will write it to the file.
-```
+
+````
 
 ### Step 5: Generate and Save Review Report
 
@@ -434,7 +437,7 @@ echo ""
 echo "Summary of findings:"
 echo "  [Summary will be provided by wiz-reviewer agent]"
 echo ""
-```
+````
 
 ## Example Output
 
@@ -486,5 +489,3 @@ Next steps:
 - Recommendations are specific and actionable
 - Review can identify missing functionality or incomplete work
 - Agent returns report as markdown code block, main agent writes file
-
-

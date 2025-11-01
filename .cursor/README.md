@@ -11,9 +11,9 @@ This directory contains the Wiz Planner plugin converted from Claude Code to Cur
 ## Key Differences from Claude Code
 
 1. **Skills Embedded**: Quality gates and other skills are embedded directly in agent definitions rather than separate files
-2. **Scripts Inlined**: Bash scripts referenced by commands are inlined within the command files
-3. **No Plugin Root**: References to `${PLUGIN_ROOT}` removed, paths use `.cursor/` relative structure
-4. **Hooks Format**: Hooks use Cursor's format (may differ from Claude Code)
+1. **Scripts Inlined**: Bash scripts referenced by commands are inlined within the command files
+1. **No Plugin Root**: References to `${PLUGIN_ROOT}` removed, paths use `.cursor/` relative structure
+1. **Hooks Format**: Hooks use Cursor's format (may differ from Claude Code)
 
 ## Usage
 
@@ -53,4 +53,3 @@ Commands are available via `/` in Cursor chat. Agents are invoked by commands wh
 - Path references updated to `.cursor/` structure
 
 See `MIGRATION.md` for detailed conversion notes.
-

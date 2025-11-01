@@ -1,6 +1,7 @@
 # Conversion Progress Tracker
 
 ## Agents (9 total)
+
 - [x] wiz-go-specialist (with embedded quality-gates-go) ✓
 - [x] wiz-typescript-specialist (with embedded quality-gates-typescript) ✓
 - [x] wiz-python-specialist (with embedded quality-gates-python) ✓
@@ -12,6 +13,7 @@
 - [x] wiz-milestone-analyst (no skills) ✓
 
 ## Commands (13 total)
+
 - [x] wiz-help ✓
 - [x] wiz-next ✓
 - [x] wiz-auto ✓
@@ -27,10 +29,12 @@
 - [ ] (skip test-subagent-filewriting.md)
 
 ## Hooks
+
 - [ ] Convert hooks.json to Cursor format
 - [ ] Adapt hook scripts
 
 ## Scripts to Inline
+
 - [ ] scripts/utils/validation.sh
 - [ ] scripts/utils/file-io.sh
 - [ ] scripts/utils/logging.sh
@@ -44,4 +48,3 @@
 - [ ] scripts/utils/command-helpers.sh
 - [ ] scripts/utils/subagent.sh
 - [ ] (and others as found)
-

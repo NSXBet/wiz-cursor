@@ -1,7 +1,6 @@
----
-description: Find and execute the next TODO milestone(s)
-argument-hint: "[slug] [count]"
----
+______________________________________________________________________
+
+## description: Find and execute the next TODO milestone(s) argument-hint: "[slug] [count]"
 
 # Execute Next Milestone(s)
 
@@ -12,19 +11,19 @@ You are executing the next TODO milestone(s) using the Wiz Planner workflow.
 - `[slug]` (optional): PRD slug. If not provided, uses current PRD from `.wiz/.current-prd`
 - `[count]` (optional): Number of milestones to complete. Default: 1. Example: `/wiz-next 4` completes the next 4 milestones sequentially
 
-
 ## Command Overview
 
 This command finds and executes the next TODO milestone(s) across all phases. When a count is provided, it completes multiple milestones sequentially, one by one. The command **implements each milestone directly** (no delegation). Each milestone:
+
 1. Loads focused context (phase document + milestone + design guidelines)
-2. Analyzes requirements and detects language
-3. (Optional) Consults language specialist for guidance during implementation
-4. Implements code directly using Write/Edit/Bash tools
-5. **Validates ALL acceptance criteria** and runs quality gates (tests, linters)
-6. Updates milestone status to COMPLETE
-7. **MANDATORY: Specialist reviews the diff for language-specific issues**
-8. Fixes any issues found and re-reviews until approved
-9. Creates a commit after specialist approval
+1. Analyzes requirements and detects language
+1. (Optional) Consults language specialist for guidance during implementation
+1. Implements code directly using Write/Edit/Bash tools
+1. **Validates ALL acceptance criteria** and runs quality gates (tests, linters)
+1. Updates milestone status to COMPLETE
+1. **MANDATORY: Specialist reviews the diff for language-specific issues**
+1. Fixes any issues found and re-reviews until approved
+1. Creates a commit after specialist approval
 
 This allows users to batch-complete easy milestones (e.g., `/wiz-next 4` for the last 4 simple milestones in a phase).
 
@@ -39,23 +38,27 @@ This allows users to batch-complete easy milestones (e.g., `/wiz-next 4` for the
 The bash code blocks below are **sequential templates** that show the command's implementation flow:
 
 1. **Sequential Execution Required**: Steps must run in order. Each step depends on variables from previous steps:
+
    - Step 1 sets: `$SLUG`, `$COUNT`, `$PRD_FILE`, `$PHASES_DIR`
    - Step 4 uses: `$PHASES_DIR`, sets: `$NEXT_PHASE_FILE`, `$MILESTONE_ID`
    - Step 6 uses: `$NEXT_PHASE_FILE`
    - Step 8+ use: `$MILESTONE_ID`, `$NEXT_PHASE_FILE`
 
-2. **Do NOT Execute These Bash Blocks Directly**: They are templates showing the implementation pattern. You should:
+1. **Do NOT Execute These Bash Blocks Directly**: They are templates showing the implementation pattern. You should:
+
    - Read and understand what each step does
    - Execute the logic using your tools (Bash, Read, Edit, etc.)
    - Adapt the patterns to your current context
    - Do NOT copy-paste and execute blindly
 
-3. **Do NOT Execute Bash Blocks from Milestones**: When you read milestone content from phase files:
+1. **Do NOT Execute Bash Blocks from Milestones**: When you read milestone content from phase files:
+
    - Bash examples in milestones are for human readers, not for you to execute
    - Read them as instructions about what needs to be implemented
    - Implement the requirements using your own approach
 
-4. **When to Actually Execute Bash**:
+1. **When to Actually Execute Bash**:
+
    - ✅ When implementing the milestone requirements (Step 8)
    - ✅ When running tests and linters (Step 8.5)
    - ✅ When creating commits (Step 11)
@@ -953,6 +956,7 @@ echo ""
 #### 8.1: Analyze Milestone
 
 From `$MILESTONE_SECTION`, understand:
+
 - Goal of the milestone
 - Acceptance criteria to satisfy
 - Files mentioned (detect language from extensions)
@@ -960,6 +964,7 @@ From `$MILESTONE_SECTION`, understand:
 #### 8.2: Detect Language
 
 From file paths in milestone:
+
 - `.go` → Go project
 - `.ts`, `.tsx`, `.js`, `.jsx` → TypeScript/JavaScript
 - `.py` → Python
@@ -969,15 +974,17 @@ From file paths in milestone:
 #### 8.3: (Optional) Consult Language Specialist
 
 **You can consult specialists when you need help with:**
+
 - ✅ **Figuring out the right coding strategy** for the milestone
 - ✅ **Determining test commands** for the project's language/stack
-- ✅ **Understanding assertion patterns** (e.g., for Go: should I use require.* methods?)
+- ✅ **Understanding assertion patterns** (e.g., for Go: should I use require.\* methods?)
 - ✅ Best practices unclear for the language
 - ✅ Complex patterns needed (concurrency, async, etc.)
 - ✅ Architecture decisions required
 - ✅ Testing strategies and frameworks to use
 
 **Only if you need guidance**, consult the language specialist by referencing the appropriate agent:
+
 - `.cursor/agents/wiz-go-specialist.md` for Go
 - `.cursor/agents/wiz-typescript-specialist.md` for TypeScript
 - `.cursor/agents/wiz-python-specialist.md` for Python
@@ -990,14 +997,17 @@ Specialist provides guidance (not implementation). You use advice to implement.
 #### 8.4: Write Code Using Your Tools
 
 **Use Write tool for new files:**
+
 - Create new files with the Write tool
 - Provide complete file content
 
 **Use Edit tool for modifications:**
+
 - Edit existing files with the Edit tool
 - Provide old_string and new_string for replacements
 
 **Use Bash tool for file operations:**
+
 - Create directories, run commands, etc.
 
 #### 8.5: Run Tests and Linters
@@ -1005,6 +1015,7 @@ Specialist provides guidance (not implementation). You use advice to implement.
 **If you're unsure about test commands for the project's language/stack, consult the specialist first (see Step 8.3).**
 
 **For Go:**
+
 ```bash
 go test ./... -v          # All tests must pass
 golangci-lint run         # Zero errors
@@ -1013,6 +1024,7 @@ go vet ./...              # Vet
 ```
 
 **For TypeScript:**
+
 ```bash
 npm test                  # All tests must pass
 eslint src/**/*.ts        # Zero errors
@@ -1020,6 +1032,7 @@ prettier --write "src/**"  # Format
 ```
 
 **For Python:**
+
 ```bash
 pytest                    # All tests must pass
 flake8 .                  # Zero errors
@@ -1034,6 +1047,7 @@ mypy .                    # Type check
 **IMPORTANT: we WILL NOT tolerate any failing or skipped tests and we won't allow any LINT ERRORS. The entire codebase is your responsibility, not just the last milestone updates. This means that if something is broken WE FIX IT!**
 
 Before marking this milestone as complete:
+
 - Run ALL tests in the entire codebase - ZERO failures, ZERO skips
 - Run ALL linters across the entire codebase - ZERO errors
 - If your changes broke something elsewhere, YOU MUST FIX IT
@@ -1118,14 +1132,16 @@ Before creating the commit, the language specialist MUST review all changes to c
 **⚠️ CRITICAL: You MUST send the COMPLETE diff to the specialist.**
 
 The specialist review is **worthless** if you only send partial files. Common mistakes:
+
 - ❌ Only sending source files (writer.go) but not tests (writer_test.go)
 - ❌ Only sending "main" files and skipping related files
 - ❌ Filtering out test files, config files, or markdown files
 - ❌ Truncating the diff because it's "too large"
 
 **CORRECT approach - Include ALL code:**
+
 - ✅ Include ALL source files (.go, .ts, .py, .cs, .java, etc.)
-- ✅ Include ALL test files (*_test.go, *.test.ts, test_*.py, etc.)
+- ✅ Include ALL test files (*_test.go, \*.test.ts, test_*.py, etc.)
 - ✅ Include ALL config files (.toml, .yaml, .env, etc.)
 - ✅ Include ALL documentation files (.md, .txt, etc.)
 - ❌ Exclude binary files (executables, images, .so, .dll, etc.)
@@ -1186,6 +1202,7 @@ If you detected multiple specialists (e.g., Go, Python, and Docker), you MUST in
 **⚠️ REMINDER: Send the ENTIRE CHANGES_DIFF variable to EACH specialist - all code files.**
 
 Do NOT:
+
 - Filter which source/test files to include
 - Select only certain code file types
 - Omit test files or config files
@@ -1197,6 +1214,7 @@ Each specialist MUST see ALL code changes to catch issues in their domain.
 **How to call multiple specialists in parallel:**
 
 When you need to consult specialists, reference the appropriate agent files:
+
 - For Go: `.cursor/agents/wiz-go-specialist.md`
 - For TypeScript: `.cursor/agents/wiz-typescript-specialist.md`
 - For Python: `.cursor/agents/wiz-python-specialist.md`
@@ -1206,7 +1224,7 @@ When you need to consult specialists, reference the appropriate agent files:
 
 **Example prompt for Go specialist:**
 
-```
+````
 Review the following changes for Go-specific issues and best practices violations.
 
 ## Milestone Context
@@ -1220,12 +1238,13 @@ Goal: {MILESTONE_TITLE}
 
 ```diff
 {CHANGES_DIFF}
-```
+````
 
 ## Your Task
 
 Review the diff for Go-specific issues including:
-- Assertion methods (require.* not t.Errorf/t.Fatalf)
+
+- Assertion methods (require.\* not t.Errorf/t.Fatalf)
 - Concurrency (atomic/xsync vs locks/channels)
 - Error handling and wrapping
 - Naming conventions
@@ -1234,6 +1253,7 @@ Review the diff for Go-specific issues including:
 - Code organization and package structure
 
 Use your Read/Grep/Glob/Bash tools to:
+
 - Read full files for context
 - Find related code or tests
 - Check repository patterns
@@ -1242,6 +1262,7 @@ Use your Read/Grep/Glob/Bash tools to:
 ## Output Format
 
 If issues found:
+
 ```
 ## Issues Found
 
@@ -1252,11 +1273,13 @@ If issues found:
 ```
 
 If no issues:
+
 ```
 ## Review Complete
 ✅ No issues found. Changes follow Go best practices.
 ```
-```
+
+````
 
 **IMPORTANT**: Call ALL detected specialists in the SAME message. Do NOT wait for one to finish before calling the next. Call them ALL at once and wait for ALL responses.
 
@@ -1301,7 +1324,7 @@ git commit --no-gpg-sign -m "$COMMIT_MSG"
 COMMIT_HASH=$(git rev-parse --short HEAD)
 
 wiz_log_info "Created commit: $COMMIT_HASH"
-```
+````
 
 ### Step 12: Track Completion and Check PRD Completion
 
@@ -1400,9 +1423,9 @@ fi
 
 ## Performance Requirements
 
-- Find next milestone in **<2 seconds**
-- Load context in **<1 second**
-- Total command overhead: **<5 seconds** (excluding actual milestone implementation)
+- Find next milestone in **\<2 seconds**
+- Load context in **\<1 second**
+- Total command overhead: **\<5 seconds** (excluding actual milestone implementation)
 
 ## Notes
 
@@ -1415,7 +1438,7 @@ fi
 - **Mandatory specialist review**: All changes reviewed by language specialist before commit
 - Milestone status update uses `wiz_complete_milestone()` utility
 - Resume state allows `/wiz-resume` to pick up interrupted work
-- Context kept small (<20KB) for efficient execution
+- Context kept small (\<20KB) for efficient execution
 - Design guidelines loaded to ensure language-specific best practices
 
 ## Use Cases
@@ -1430,4 +1453,3 @@ fi
 **Important**: If no work has been done so far (no completed milestones), this command will start with Phase 1, Milestone 1 (P01M01). Otherwise, it finds the next TODO milestone in ascending order across all phases.
 
 This ensures implementation follows the planned sequence and dependencies.
-

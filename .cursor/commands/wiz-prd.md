@@ -1,7 +1,6 @@
----
-description: Generate comprehensive PRD through guided Q&A with research
-argument-hint: <slug> "<idea>"
----
+______________________________________________________________________
+
+## description: Generate comprehensive PRD through guided Q&A with research argument-hint: <slug> "<idea>"
 
 # Generate PRD from Idea
 
@@ -10,6 +9,7 @@ You are creating a comprehensive Product Requirements Document (PRD) using the W
 ## ⚠️ CRITICAL: Human Answers Required
 
 **DO NOT answer questions yourself.** The questions generated in Stage 1 are for the **HUMAN USER** to answer. Your role is to:
+
 - Generate context-aware questions based on codebase analysis
 - Present questions to the human user
 - **WAIT for the human user to provide answers**
@@ -23,10 +23,10 @@ You are creating a comprehensive Product Requirements Document (PRD) using the W
 **MAIN AGENT (you, running /wiz-prd) MUST WRITE FILES** at each stage. This command requires creating actual files, not just generating content:
 
 1. **Delegate to wiz-planner agent** for content generation (questions, answers, PRD)
-2. **Agent returns content** in code blocks (JSON or markdown)
-3. **Main agent writes files** using Write tool (questions.json, answers.json, prd.md, etc.)
-4. **Verify files exist** after writing by checking the filesystem
-5. **Never skip file creation** - the user needs these files to continue the workflow
+1. **Agent returns content** in code blocks (JSON or markdown)
+1. **Main agent writes files** using Write tool (questions.json, answers.json, prd.md, etc.)
+1. **Verify files exist** after writing by checking the filesystem
+1. **Never skip file creation** - the user needs these files to continue the workflow
 
 **Why this pattern?** Agents invoked via agent references cannot reliably write files. The workaround is: agent generates content, main agent writes files.
 
@@ -44,15 +44,16 @@ This command delegates content generation to the **wiz-planner** agent (`.cursor
 This command follows a three-stage workflow:
 
 1. **Codebase Analysis**: Analyze repository to detect language, patterns, and infrastructure (BEFORE generating questions)
-2. **Question Generation**: Generate 5-20 context-aware clarifying questions that require HUMAN judgment
-3. **Answer Collection**: **WAIT for HUMAN USER** to provide answers in chat (do NOT answer questions yourself)
-4. **PRD Generation**: Research and create comprehensive PRD document based on HUMAN USER answers
+1. **Question Generation**: Generate 5-20 context-aware clarifying questions that require HUMAN judgment
+1. **Answer Collection**: **WAIT for HUMAN USER** to provide answers in chat (do NOT answer questions yourself)
+1. **PRD Generation**: Research and create comprehensive PRD document based on HUMAN USER answers
 
 ## Stage 1: Codebase Analysis (BEFORE Question Generation)
 
 **⚠️ CRITICAL: You MUST analyze the codebase FIRST before generating questions.**
 
 Before generating any questions, analyze the repository to understand:
+
 - **Primary programming language(s)** - detect from file extensions and existing code
 - **Existing patterns and conventions** - frameworks, libraries, architectural patterns
 - **Current project structure** - what already exists
@@ -143,21 +144,23 @@ Use the analysis results to inform question generation. **DO NOT ask questions a
 Generate 5-20 clarifying questions to understand the project requirements. Questions MUST be:
 
 1. **Context-Aware**: Skip questions about things already determined from codebase analysis
-2. **Require Human Judgment**: Only ask questions that need human decision-making
-3. **Pertinent**: Focus on aspects that matter for this specific idea and codebase
+1. **Require Human Judgment**: Only ask questions that need human decision-making
+1. **Pertinent**: Focus on aspects that matter for this specific idea and codebase
 
 **Conditional Required Questions** (only ask if not already determined):
 
 1. **Primary language** - ONLY ask if codebase analysis shows:
+
    - No clear primary language (multiple languages with similar file counts)
    - No code files found (new project)
    - Otherwise, use detected language and state it: "Detected primary language: Go (from codebase analysis). Confirm or specify different language(s) if needed?"
 
-2. **Benchmarking policy** - Ask as: "What is the benchmarking policy? (hot spots only, comprehensive, or skip)" - BUT include context from analysis if benchmarks already exist
+1. **Benchmarking policy** - Ask as: "What is the benchmarking policy? (hot spots only, comprehensive, or skip)" - BUT include context from analysis if benchmarks already exist
 
-3. **Fuzzing policy** - Ask as: "What is the fuzzing policy? (core areas only, comprehensive, or skip)" - BUT include context from analysis if fuzzing already exists
+1. **Fuzzing policy** - Ask as: "What is the fuzzing policy? (core areas only, comprehensive, or skip)" - BUT include context from analysis if fuzzing already exists
 
 **Additional Questions** (based on the idea):
+
 - Target users and personas
 - Key objectives and success metrics
 - Technical constraints and assumptions
@@ -172,26 +175,31 @@ Generate 5-20 clarifying questions to understand the project requirements. Quest
 When generating questions, follow these principles:
 
 1. **Specificity**: Ask concrete questions that lead to actionable answers
+
    - Good: "What authentication methods should be supported? (e.g., email/password, OAuth, SSO)"
    - Bad: "Tell me about authentication"
 
-2. **Scope Clarity**: Help users understand what level of detail is needed
+1. **Scope Clarity**: Help users understand what level of detail is needed
+
    - Good: "What is the expected peak request rate? (e.g., 100 req/s, 1000 req/s)"
    - Bad: "What are the performance requirements?"
 
-3. **Context Awareness**: Tailor questions to the specific idea provided
+1. **Context Awareness**: Tailor questions to the specific idea provided
+
    - For a CLI tool: Ask about platforms, distribution, dependencies
    - For a web API: Ask about endpoints, data formats, rate limiting
    - For a library: Ask about API surface, target consumers, backward compatibility
 
-4. **NFR Coverage**: Ensure questions cover P0-P4 priorities
+1. **NFR Coverage**: Ensure questions cover P0-P4 priorities
+
    - P0 Correctness: Edge cases, error scenarios, validation rules
    - P1 Tests: Testing strategy, coverage expectations
    - P2 Security: Auth, data protection, vulnerability concerns
    - P3 Quality: Code standards, review process, documentation needs
    - P4 Performance: Latency targets, throughput, resource limits
 
-5. **Question Count**: Generate 5-20 questions based on complexity
+1. **Question Count**: Generate 5-20 questions based on complexity
+
    - Simple features: 5-8 questions
    - Medium complexity: 9-14 questions
    - Complex systems: 15-20 questions
@@ -209,11 +217,13 @@ Each question must conform to the JSON schema:
 ```
 
 **Required Fields:**
+
 - `index` (integer): 1-based question number
 - `question` (string): The clarifying question with examples or options when helpful
 - `rationale` (string): Brief explanation of why this matters for the PRD
 
 **Validation Requirements:**
+
 - Questions 1-3 must be the required questions in exact order
 - All indices must be sequential (1, 2, 3, ...)
 - No duplicate questions or indices
@@ -783,6 +793,7 @@ The analysis results will be provided to the agent to inform question generation
 Agents invoked via agent references **cannot reliably write files**. This is a known limitation.
 
 **Solution:**
+
 - The `wiz-planner` agent **returns file contents** as code blocks in its response
 - The main agent (you, running /wiz-prd) **performs all Write operations**
 - Agent focuses on: question generation, answer parsing, PRD content generation
@@ -791,22 +802,24 @@ Agents invoked via agent references **cannot reliably write files**. This is a k
 **⚠️ CRITICAL: Questions MUST be answered by HUMAN, NOT by AI**
 
 **DO NOT answer the questions yourself.** The questions are for the HUMAN USER to answer. Your job is to:
+
 1. Generate the questions
-2. Present them to the user
-3. Wait for the user to provide answers
-4. Parse the user's answers
-5. Generate the PRD from the user's answers
+1. Present them to the user
+1. Wait for the user to provide answers
+1. Parse the user's answers
+1. Generate the PRD from the user's answers
 
 **Workflow:**
+
 1. Analyze codebase first (detect language, patterns, infrastructure)
-2. Delegate question generation to wiz-planner agent with codebase context
-3. Agent returns questions as JSON in code block
-4. Main agent writes questions.json using Write tool
-5. Main agent creates state.json using Write tool
-6. **Main agent presents questions to user and WAITS for human answers**
-7. When user provides answers, delegate to wiz-planner to parse and generate PRD
-8. Agent returns answers.json and prd.md content as code blocks
-9. Main agent writes all files using Write tool
+1. Delegate question generation to wiz-planner agent with codebase context
+1. Agent returns questions as JSON in code block
+1. Main agent writes questions.json using Write tool
+1. Main agent creates state.json using Write tool
+1. **Main agent presents questions to user and WAITS for human answers**
+1. When user provides answers, delegate to wiz-planner to parse and generate PRD
+1. Agent returns answers.json and prd.md content as code blocks
+1. Main agent writes all files using Write tool
 
 Reference the `.cursor/agents/wiz-planner.md` agent with the following prompt (including the codebase analysis):
 
@@ -941,13 +954,16 @@ Return ONLY the questions (not answers) in this exact format:
 After receiving the agent's response with questions JSON in a code block, the **main agent** (you, executing the /wiz-prd command) must:
 
 1. **Extract JSON from code block** in the agent's response
-2. **Write questions.json** using Write tool:
+
+1. **Write questions.json** using Write tool:
+
    ```
    file_path: .wiz/<slug>/intake/questions.json
    content: <extracted JSON from agent response>
    ```
 
-3. **Write state.json** using Write tool:
+1. **Write state.json** using Write tool:
+
    ```bash
    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
    cat > ".wiz/$SLUG/intake/state.json" <<EOF
@@ -960,44 +976,47 @@ After receiving the agent's response with questions JSON in a code block, the **
    EOF
    ```
 
-4. **Save current PRD**:
+1. **Save current PRD**:
+
    ```bash
    wiz_set_current_prd "$SLUG"
    wiz_log_info "Set current PRD to: $SLUG"
    ```
 
-5. **Present questions to user**:
+1. **Present questions to user**:
+
    ```
    📋 PRD Question Generation Complete
-   
+
    I've analyzed the codebase and generated N clarifying questions to help create a comprehensive PRD for: {IDEA}
-   
+
    **Codebase Analysis Summary:**
    - Primary language detected: {PRIMARY_LANG} ({MAX_COUNT} files)
    - Test infrastructure: {HAS_TESTS} test files found
    - Existing benchmarks: {HAS_BENCHMARKS}
    - Existing fuzzing: {HAS_FUZZ}
-   
+
    **Note**: Questions have been tailored based on this analysis. Questions about things already determined from the codebase have been skipped or made context-aware.
-   
+
    **Questions for YOU to answer:**
-   
+
    <display questions in numbered list format with rationale>
-   
+
    ⚠️ **IMPORTANT**: These questions require YOUR HUMAN JUDGMENT and DECISION-MAKING.
    Please provide YOUR answers to these questions in the chat. You do NOT need to re-run this command.
-   
+
    Once you provide YOUR answers, I will automatically:
    1. Parse and save your answers
    2. Research relevant technical details
    3. Generate a comprehensive PRD document based on YOUR decisions
-   
+
    Format your answers however is comfortable for you - I'll parse them intelligently.
    ```
 
-6. **STOP and WAIT for user answers** - Do NOT proceed to Stage 2 until the user provides answers
+1. **STOP and WAIT for user answers** - Do NOT proceed to Stage 2 until the user provides answers
 
-7. **Verify files exist**:
+1. **Verify files exist**:
+
    ```bash
    ls -la .wiz/$SLUG/intake/
    ```
@@ -1015,18 +1034,21 @@ When the HUMAN USER provides answers in the chat (as a continuation), the `wiz-p
 The agent should:
 
 1. **Detect Answer Context**: Recognize that the HUMAN USER is responding to the questions from Stage 1
+
    - Check if state is "awaiting_answers"
    - Load questions from `.wiz/<slug>/intake/questions.json`
    - Load codebase analysis from state.json
 
-2. **Parse HUMAN USER Answers Intelligently**: Extract answers from the HUMAN USER's message
+1. **Parse HUMAN USER Answers Intelligently**: Extract answers from the HUMAN USER's message
+
    - Support various formats: numbered lists, natural language, mixed formats
    - Match answers to questions by index or content
    - Handle multi-line answers and code blocks
    - Allow "skip" or "N/A" for optional questions
    - **DO NOT** infer or guess answers - only use what the HUMAN USER explicitly provided
 
-3. **Validate Completeness**: Ensure required questions have HUMAN USER answers
+1. **Validate Completeness**: Ensure required questions have HUMAN USER answers
+
    - Questions 1-3 (language, benchmarking, fuzzing) MUST have non-empty answers from HUMAN USER
    - If answers are missing, prompt HUMAN USER for missing answers - DO NOT generate answers yourself
 
@@ -1052,12 +1074,14 @@ Answers must conform to JSON schema:
 ```
 
 **Required Fields:**
+
 - `index` (integer): Matches question index (1-based)
 - `answer` (string): User's answer (non-empty for required questions)
 
 ### Parsing Examples
 
 **Example 1: Numbered List Format**
+
 ```
 User: Here are my answers:
 1. Go
@@ -1070,6 +1094,7 @@ User: Here are my answers:
 Parser should extract each answer by index.
 
 **Example 2: Natural Language Format**
+
 ```
 User: For the language I want to use Go. The benchmarking should focus on hot spots only.
 For fuzzing, let's do comprehensive testing. The target users are developers building CLI tools...
@@ -1078,6 +1103,7 @@ For fuzzing, let's do comprehensive testing. The target users are developers bui
 Parser should match phrases to questions and extract answers.
 
 **Example 3: Mixed Format with Code Blocks**
+
 ```
 User:
 1. Primary language: Go
@@ -1106,23 +1132,24 @@ Parser should handle mixed format and preserve code blocks in answers.
 Return the answers in this exact format:
 
 \`\`\`json
-[
-  {
-    "index": 1,
-    "answer": "Go and TypeScript"
-  },
-  {
-    "index": 2,
-    "answer": "hot spots only"
-  },
-  ...additional answers...
-]
+\[
+{
+"index": 1,
+"answer": "Go and TypeScript"
+},
+{
+"index": 2,
+"answer": "hot spots only"
+},
+...additional answers...
+\]
 \`\`\`
 
 The main agent will:
+
 1. Extract the JSON from your response
-2. Validate it against the schema
-3. Write it to `.wiz/<slug>/intake/answers.json`
+1. Validate it against the schema
+1. Write it to `.wiz/<slug>/intake/answers.json`
 
 ### Return Q&A Summary (Do NOT Write Files)
 
@@ -1131,6 +1158,7 @@ The main agent will:
 **Expected Output Format:**
 
 \`\`\`markdown
+
 # Q&A Session
 
 **PRD**: <slug>
@@ -1145,7 +1173,7 @@ The main agent will:
 
 **Answer**: Go and TypeScript
 
----
+______________________________________________________________________
 
 ### 2. What is the benchmarking policy?
 
@@ -1153,7 +1181,7 @@ The main agent will:
 
 **Answer**: hot spots only
 
----
+______________________________________________________________________
 
 [... continue for all questions ...]
 \`\`\`
@@ -1165,8 +1193,11 @@ The main agent will write this to `.wiz/<slug>/intake/qa.md`
 After receiving the agent's response with answers and Q&A summary:
 
 1. **Write answers.json** using Write tool
-2. **Write qa.md** using Write tool
-3. **Update state.json**:
+
+1. **Write qa.md** using Write tool
+
+1. **Update state.json**:
+
    ```bash
    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
    cat > ".wiz/$SLUG/intake/state.json" <<EOF
@@ -1180,15 +1211,16 @@ After receiving the agent's response with answers and Q&A summary:
    EOF
    ```
 
-4. **Inform user**:
+1. **Inform user**:
+
    ```
    Thank you! I've saved your answers and generated a Q&A summary at .wiz/<slug>/intake/qa.md
-   
+
    I'm now proceeding to Stage 3: PRD Generation
    - Researching relevant technical details
    - Loading PRD template
    - Rendering comprehensive PRD document
-   
+
    This may take 2-3 minutes...
    ```
 
@@ -1203,21 +1235,25 @@ The `wiz-planner` agent will research, synthesize, and generate a comprehensive 
 Before generating the PRD, conduct targeted research to enhance quality:
 
 1. **Language-Specific Research**: Based on answer to question 1 (primary language)
+
    - Look up current language version and ecosystem best practices
    - Research relevant frameworks and libraries for the project type
    - Find design patterns and idioms specific to the language
 
-2. **Domain-Specific Research**: Based on the project idea and requirements
+1. **Domain-Specific Research**: Based on the project idea and requirements
+
    - Research similar projects or reference implementations
    - Look up industry standards or compliance requirements
    - Find performance benchmarks for similar systems
 
-3. **Technical Research**: Based on integration and technical constraints
+1. **Technical Research**: Based on integration and technical constraints
+
    - Research APIs or systems mentioned in answers
    - Look up compatibility requirements
    - Find deployment best practices for target environments
 
 **Research Guidelines**:
+
 - Limit research to 5-10 focused queries (2-3 minutes total)
 - Prioritize official documentation and authoritative sources
 - Extract actionable insights, not general information
@@ -1228,11 +1264,12 @@ Before generating the PRD, conduct targeted research to enhance quality:
 ### Template Loading and Rendering
 
 1. **Load Template**: Read PRD template if available, or use standard structure
+
    - YAML frontmatter with metadata fields
    - Markdown sections with `{{variable}}` placeholders
    - WIZ:SECTION anchors for phase/milestone parsing
 
-2. **Prepare Template Variables**: Extract data from answers and research
+1. **Prepare Template Variables**: Extract data from answers and research
 
 ```bash
 # Load questions and answers
@@ -1267,36 +1304,43 @@ TEMPLATE_VARS='{
 For each PRD section, synthesize content from answers and research:
 
 **Section: Background**
+
 - Combine idea description with problem context from answers
 - Add relevant domain context from research
 - Keep concise (2-3 paragraphs)
 
 **Section: Problem Statement**
+
 - Extract from user pain points and use case answers
 - Make specific and measurable
 - Include current state vs. desired state
 
 **Section: Goals and Non-Goals**
+
 - Goals: Extract from objectives and must-have features
 - Non-Goals: Extract from out-of-scope answers
 - Format as bulleted lists (3-7 items each)
 
 **Section: User Personas and Use Cases**
+
 - Extract personas from target user answers
 - Create 2-4 detailed use cases with scenarios
 - Include expected outcomes
 
 **Section: Technical Architecture**
+
 - Describe high-level architecture based on answers
 - Include integration points
 - Add component diagrams (text-based) if helpful
 
 **Section: Functional Requirements**
+
 - List must-have features from answers
 - Organize by component or user journey
 - Use clear, testable language (e.g., "System shall...")
 
 **Section: Non-Functional Requirements**
+
 - Organize by P0-P4 priority order:
   - P0: Correctness (error handling, edge cases)
   - P1: Regression Prevention (test coverage, CI/CD)
@@ -1306,18 +1350,22 @@ For each PRD section, synthesize content from answers and research:
 - Include specific targets from answers (e.g., "P99 latency < 100ms")
 
 **Section: Design Guidelines**
+
 - Reference language-specific guidelines
 - Note: "Detailed design guidelines will be applied during implementation (Phase 1)"
 
 **Section: Milestones and Phasing**
+
 - Note: "Will be generated by /wiz-phases command after PRD approval"
 - Provide rough timeline estimate if deadline mentioned in answers
 
 **Section: Open Questions**
+
 - List any unclear requirements or needed decisions
 - Include questions where answers were "skip" or "TBD"
 
 **Section: Appendix**
+
 - Research sources and references
 - Relevant standards or compliance documents
 
@@ -1327,18 +1375,9 @@ For each PRD section, synthesize content from answers and research:
 
 **Expected Output Format:**
 
-\`\`\`markdown
----
-title: "<Project Title>"
-slug: "<slug>"
-version: "1.0.0"
-status: "Draft"
-created: "2025-10-19"
-owner: "<from answer or 'TBD'>"
-primary_language: "<from answer 1>"
-benchmarking_policy: "<from answer 2>"
-fuzzing_policy: "<from answer 3>"
----
+## \`\`\`markdown
+
+## title: "<Project Title>" slug: "<slug>" version: "1.0.0" status: "Draft" created: "2025-10-19" owner: "\<from answer or 'TBD'>" primary_language: "\<from answer 1>" benchmarking_policy: "\<from answer 2>" fuzzing_policy: "\<from answer 3>"
 
 # Product Requirements Document: <Project Title>
 
@@ -1353,13 +1392,15 @@ fuzzing_policy: "<from answer 3>"
 ## Goals and Non-Goals
 
 ### Goals
+
 - Goal 1
 - Goal 2
-...
+  ...
 
 ### Non-Goals
+
 - Non-goal 1
-...
+  ...
 
 [... complete PRD content following template structure ...]
 \`\`\`
@@ -1371,13 +1412,16 @@ The main agent will write this to `.wiz/<slug>/prd.md`
 After receiving the agent's response with PRD content in a code block:
 
 1. **Extract PRD markdown** from code block
-2. **Write prd.md** using Write tool:
+
+1. **Write prd.md** using Write tool:
+
    ```
    file_path: .wiz/<slug>/prd.md
    content: <extracted markdown from agent response>
    ```
 
-3. **Update state.json**:
+1. **Update state.json**:
+
    ```bash
    TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
    cat > ".wiz/$SLUG/intake/state.json" <<EOF
@@ -1392,7 +1436,8 @@ After receiving the agent's response with PRD content in a code block:
    EOF
    ```
 
-4. **Verify files exist**:
+1. **Verify files exist**:
+
    ```bash
    ls -la .wiz/$SLUG/intake/
    ls -la .wiz/$SLUG/prd.md
@@ -1443,11 +1488,12 @@ You can now review the PRD and proceed with phasing when ready.
 ```
 
 This will:
+
 1. Create `.wiz/auth-system/intake/` directory
-2. Generate clarifying questions
-3. Wait for user answers in chat
-4. Research and create comprehensive PRD
-5. Save PRD to `.wiz/auth-system/prd.md`
+1. Generate clarifying questions
+1. Wait for user answers in chat
+1. Research and create comprehensive PRD
+1. Save PRD to `.wiz/auth-system/prd.md`
 
 ## Notes
 
@@ -1456,4 +1502,3 @@ This will:
 - Research phase uses web tools if available
 - PRD template includes all standard sections with NFR priority order
 - Command delegates to `wiz-planner` agent (reference `.cursor/agents/wiz-planner.md`)
-
