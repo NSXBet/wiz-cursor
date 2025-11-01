@@ -1,6 +1,7 @@
-______________________________________________________________________
-
-## description: Generate detailed milestones for all phases argument-hint: <slug>
+---
+description: Generate detailed milestones for all phases
+argument-hint: <slug>
+---
 
 # Generate Implementation Milestones
 
@@ -11,10 +12,10 @@ You are generating detailed implementation milestones for all phases using the W
 **YOU MUST WRITE FILES TO DISK YOURSELF**. Do not delegate to subagents for file operations:
 
 1. **Read each phase file** to understand requirements
-1. **Generate milestones** for that phase (15-40 milestones)
-1. **Use Edit tool YOURSELF** to append milestones to phase files
-1. **Verify files** were updated after writing
-1. **Process all phases** before completing
+2. **Generate milestones** for that phase (15-40 milestones)
+3. **Use Edit tool YOURSELF** to append milestones to phase files
+4. **Verify files** were updated after writing
+5. **Process all phases** before completing
 
 Previous versions delegated to subagents, but this proved unreliable. You must do all the work directly.
 
@@ -454,12 +455,11 @@ Unless you have already tried Option A and it failed, you MUST use parallel proc
 1. **Launch ALL phases in parallel** using Task tool in a SINGLE message
    - One Task tool call per phase
    - All Task calls in the same message for parallel execution
-1. **Each subagent** receives the complete task prompt from the template below
-1. **After all tasks complete**, verify each phase file has milestones
-1. **ONLY if verification fails**, fall back to Option B for failed phases
+2. **Each subagent** receives the complete task prompt from the template below
+3. **After all tasks complete**, verify each phase file has milestones
+4. **ONLY if verification fails**, fall back to Option B for failed phases
 
 **Why Use This**:
-
 - 🚀 **5-10x faster**: Processes all phases simultaneously
 - ✅ **Should work**: Subagents CAN execute bash commands
 - 🔄 **Safe**: Has automatic fallback if it fails
@@ -469,19 +469,18 @@ Unless you have already tried Option A and it failed, you MUST use parallel proc
 #### Option B: Sequential Processing (FALLBACK ONLY)
 
 **ONLY use this if**:
-
 - You already tried Option A and it failed (0 tool uses or files not written)
 - You are processing specific phases that failed in Option A
 
 Process phases one at a time:
 
 1. **Read the PRD** (`.wiz/{SLUG}/prd.md`) for context
-1. **Read the phase file** (`.wiz/{SLUG}/phases/phase{N}.md`)
-1. **Determine milestone count** from phase metadata
-1. **Generate ALL milestones** for this phase
-1. **Use the append_milestone bash function** to write each milestone
-1. **Verify file was updated** by reading it back
-1. **Move to next phase** and repeat
+2. **Read the phase file** (`.wiz/{SLUG}/phases/phase{N}.md`)
+3. **Determine milestone count** from phase metadata
+4. **Generate ALL milestones** for this phase
+5. **Use the append_milestone bash function** to write each milestone
+6. **Verify file was updated** by reading it back
+7. **Move to next phase** and repeat
 
 **This is slower** (sequential vs parallel) but guaranteed reliable.
 
@@ -489,7 +488,7 @@ Process phases one at a time:
 
 When using parallel processing, launch ALL tasks in a SINGLE message with this prompt for each phase:
 
-````
+```
 Generate milestones for Phase {phase_num} in PRD: {SLUG}
 
 ## ⚠️ CRITICAL: Use Bash Commands to Write Files
@@ -532,7 +531,7 @@ append_milestone() {
     mv "$temp_file" "$phase_file"
     echo "✓ Appended milestone"
 }
-````
+```
 
 ## How to Use the Function
 
@@ -564,7 +563,6 @@ append_milestone "{SLUG}" {phase_num} "$MILESTONE"
 ```
 
 **CRITICAL**:
-
 - You MUST actually execute these bash commands
 - Do NOT just generate milestone content without writing it
 - Use the bash function for EVERY milestone
@@ -573,14 +571,12 @@ append_milestone "{SLUG}" {phase_num} "$MILESTONE"
 ## After Generating All Milestones
 
 1. Read the phase file back to verify milestones are present
-1. Count the milestones (should match target count)
-1. Report: "✅ Phase {N}: Generated and wrote {count} milestones"
-
+2. Count the milestones (should match target count)
+3. Report: "✅ Phase {N}: Generated and wrote {count} milestones"
 ```
 
 **Example parallel launch**:
 ```
-
 I'm launching milestone generation for all 5 phases in parallel...
 
 [Task tool: Generate milestones for Phase 1]
@@ -590,8 +586,7 @@ I'm launching milestone generation for all 5 phases in parallel...
 [Task tool: Generate milestones for Phase 5]
 
 All in the same message to execute in parallel.
-
-````
+```
 
 ## How to Append Milestones (Inline Bash)
 
@@ -629,7 +624,7 @@ append_milestone() {
 
     echo "✓ Appended milestone to $phase_file"
 }
-````
+```
 
 ### How to Use It
 
@@ -675,7 +670,6 @@ append_milestone "my-project" 1 "$MILESTONE"
 ### Milestone Granularity
 
 Each milestone should represent ~1 hour of work:
-
 - Small enough to complete in a single focused session
 - Large enough to deliver tangible value or progress
 - Specific enough to have clear acceptance criteria
@@ -713,7 +707,6 @@ Use the milestone template:
 ### Milestone Titling
 
 Use clear, actionable titles with imperative mood:
-
 - Good: "Implement user authentication endpoint"
 - Bad: "User authentication" (not actionable)
 - Good: "Add error handling to file operations"
@@ -722,7 +715,6 @@ Use clear, actionable titles with imperative mood:
 ### Milestone Count by Phase
 
 Distribute milestones based on phase complexity from phase metadata:
-
 - Look for `**Duration**: ~X days (Y milestones @ 1h each)` in phase file
 - Use Y as target milestone count
 - Adjust slightly if needed for logical grouping (±3 milestones)
@@ -732,23 +724,22 @@ Distribute milestones based on phase complexity from phase metadata:
 Within each phase, milestones should follow logical order:
 
 1. **Foundation Before Features**: Setup/structure before usage
-1. **Core Before Edge Cases**: Happy path before error handling
-1. **Implementation Before Testing**: Code before tests for that code
-1. **Unit Before Integration**: Isolated tests before integration tests
-1. **Features Before Documentation**: Working code before docs
-1. **Verification Last**: Phase completion verification as final milestone
+2. **Core Before Edge Cases**: Happy path before error handling
+3. **Implementation Before Testing**: Code before tests for that code
+4. **Unit Before Integration**: Isolated tests before integration tests
+5. **Features Before Documentation**: Working code before docs
+6. **Verification Last**: Phase completion verification as final milestone
 
 Example sequence for a "File Upload" feature:
-
 1. Create file upload data structure
-1. Implement file validation logic
-1. Add file storage functionality
-1. Handle file upload errors
-1. Write unit tests for validation
-1. Write unit tests for storage
-1. Add integration test for upload flow
-1. Document file upload API
-1. **Verify phase completion** (final milestone)
+2. Implement file validation logic
+3. Add file storage functionality
+4. Handle file upload errors
+5. Write unit tests for validation
+6. Write unit tests for storage
+7. Add integration test for upload flow
+8. Document file upload API
+9. **Verify phase completion** (final milestone)
 
 ### Phase Verification Milestone (Required)
 
@@ -757,7 +748,6 @@ Example sequence for a "File Upload" feature:
 This milestone ensures the phase is truly complete before moving to the next phase.
 
 **Milestone Template**:
-
 ```markdown
 ### P{NN}M{LAST}: Verify Phase {N} Completion
 
@@ -781,24 +771,21 @@ Verify that all Phase {N} requirements are met, tests pass, benchmarks are in pl
 ```
 
 **When to Include**:
-
 - **EVERY phase** must have this as the final milestone
 - This is milestone N where N is the total count for that phase
 - Example: If Phase 1 has 25 milestones, P01M25 should be the verification milestone
 
 **What to Verify**:
-
 1. **Completeness**: All feature milestones completed
-1. **Testing**: Test suite comprehensive and passing
-1. **Benchmarks**: Performance validated (if required by project)
-1. **Quality**: Code meets standards from design guidelines
-1. **Documentation**: All changes documented
-1. **Readiness**: Confident to move to next phase
+2. **Testing**: Test suite comprehensive and passing
+3. **Benchmarks**: Performance validated (if required by project)
+4. **Quality**: Code meets standards from design guidelines
+5. **Documentation**: All changes documented
+6. **Readiness**: Confident to move to next phase
 
 ### Milestone Types by Phase
 
 **Phase 1 (Foundation)**:
-
 - Directory structure creation
 - Template files
 - Utility functions
@@ -806,7 +793,6 @@ Verify that all Phase {N} requirements are met, tests pass, benchmarks are in pl
 - Testing infrastructure
 
 **Phase 2 (Core Features)**:
-
 - Main functionality implementation
 - API endpoints
 - Business logic
@@ -814,14 +800,12 @@ Verify that all Phase {N} requirements are met, tests pass, benchmarks are in pl
 - Core workflows
 
 **Phase 3 (Advanced Features)**:
-
 - Secondary features
 - Integrations
 - Enhanced functionality
 - User experience improvements
 
 **Phase 4-5 (Quality & Deployment)**:
-
 - Additional test coverage
 - Performance optimization
 - Documentation
@@ -833,14 +817,12 @@ Verify that all Phase {N} requirements are met, tests pass, benchmarks are in pl
 Each milestone must have 3-5 specific, testable criteria:
 
 **Good Criteria** (specific, measurable):
-
 - ✅ "File created: `src/auth/login.ts`"
 - ✅ "Unit test passes: `login.test.ts` covers happy path"
 - ✅ "Error handling: returns 401 for invalid credentials"
 - ✅ "Integration test: end-to-end login flow succeeds"
 
 **Bad Criteria** (vague, unmeasurable):
-
 - ❌ "Login works"
 - ❌ "Code is tested"
 - ❌ "Documentation updated"
@@ -851,33 +833,28 @@ Each milestone must have 3-5 specific, testable criteria:
 Ensure milestones address P0-P4 priorities:
 
 **P0 Correctness**: Include in most milestones
-
 - Error handling
 - Edge case validation
 - Data validation
 
 **P1 Regression Prevention**: Include test milestones
-
 - Unit tests
 - Integration tests
 - Test fixtures
 
 **P2 Security**: Include dedicated milestones
-
 - Authentication
 - Authorization
 - Input sanitization
 - Encryption
 
 **P3 Quality**: Include dedicated milestones
-
 - Code review
 - Documentation
 - Refactoring
 - Linting/formatting
 
 **P4 Performance**: Include if required by PRD
-
 - Profiling
 - Optimization
 - Load testing
@@ -887,8 +864,8 @@ Ensure milestones address P0-P4 priorities:
 After processing all phases, **verify each file** contains milestones:
 
 1. **Read each phase file** (`.wiz/{slug}/phases/phase{N}.md`)
-1. **Check for milestones** - look for `### P{N}M` pattern entries
-1. **Count milestones** - ensure count matches phase duration metadata
+2. **Check for milestones** - look for `### P{N}M` pattern entries
+3. **Count milestones** - ensure count matches phase duration metadata
 
 If any phase is missing milestones, go back and process it.
 
@@ -913,7 +890,7 @@ Files updated:
 
 Create `IMPLEMENTATION_GUIDE.md` with PRD-specific context:
 
-````markdown
+```markdown
 # Implementation Guide: {PRD Title}
 
 **PRD**: {slug}
@@ -937,7 +914,7 @@ If no work has been done so far, start with Phase 1, Milestone 1 (P01M01). Other
 To begin implementation:
 ```bash
 /wiz:next
-````
+```
 
 This will load the next TODO milestone and guide you through implementation.
 
@@ -952,17 +929,15 @@ This will load the next TODO milestone and guide you through implementation.
 ## Phase Overview
 
 {For each phase, provide:
-
 - Phase number and title
 - Brief goal
 - Milestone count
 - Dependencies
-  }
+}
 
 ## Design Guidelines
 
 This project uses the following design guidelines:
-
 - {Language 1}: `.wiz/design-guidelines/{lang1}.md` (generated from templates)
 - {Language 2}: `.wiz/design-guidelines/{lang2}.md` (if multi-language)
 
@@ -973,50 +948,47 @@ Refer to these guidelines during implementation for language-specific best pract
 This project follows the Wiz Planner NFR priority order:
 
 1. **P0 - Correctness**: Code must work correctly for all inputs
-1. **P1 - Regression Prevention**: Tests prevent future breakage
-1. **P2 - Security**: System is secure against threats
-1. **P3 - Quality**: Code is maintainable and documented
-1. **P4 - Performance**: System meets performance targets
+2. **P1 - Regression Prevention**: Tests prevent future breakage
+3. **P2 - Security**: System is secure against threats
+4. **P3 - Quality**: Code is maintainable and documented
+5. **P4 - Performance**: System meets performance targets
 
 Address priorities in this order during implementation.
 
 ## Testing Strategy
 
 {Extract from PRD answers and requirements:
-
 - Unit testing approach
 - Integration testing approach
 - Test coverage targets
 - Benchmarking policy (from answers)
 - Fuzzing policy (from answers)
-  }
+}
 
 ## Key Technical Decisions
 
 {Extract from PRD:
-
 - Architecture choices
 - Technology stack
 - Integration points
 - Constraints
-  }
+}
 
 ## Success Metrics
 
 {Extract from PRD:
-
 - Acceptance criteria
 - Success metrics
 - Performance targets
-  }
+}
 
 ## Next Steps
 
 1. Review this guide and the PRD (`.wiz/{slug}/prd.md`)
-1. Familiarize yourself with phase structure (`.wiz/{slug}/phases/`)
-1. Run `/wiz:next` to begin Phase 1, Milestone 1 (P01M01)
-1. Follow the milestone acceptance criteria
-1. Use `/wiz:review-milestone P01M01` when complete
+2. Familiarize yourself with phase structure (`.wiz/{slug}/phases/`)
+3. Run `/wiz:next` to begin Phase 1, Milestone 1 (P01M01)
+4. Follow the milestone acceptance criteria
+5. Use `/wiz:review-milestone P01M01` when complete
 
 ## Resources
 
@@ -1025,11 +997,10 @@ Address priorities in this order during implementation.
 - Design Guidelines: `.wiz/design-guidelines/`
 - Phase Documents: `.wiz/{slug}/phases/`
 
-______________________________________________________________________
+---
 
 Generated by Wiz Planner • {timestamp}
-
-````
+```
 
 Save to `.wiz/{SLUG}/IMPLEMENTATION_GUIDE.md`
 
@@ -1041,7 +1012,7 @@ Set current PRD to indicate milestones have been generated:
 wiz_set_current_prd "$SLUG"
 
 wiz_log_info "Set current PRD to: $SLUG"
-````
+```
 
 ### Step 8: Display Final Success Message
 
@@ -1103,12 +1074,11 @@ You're ready to start implementing! Run `/wiz:next` when ready.
 ```
 
 This will:
-
 1. Read `.wiz/auth-system/prd.md` and `.wiz/auth-system/phases/phase*.md`
-1. Generate detailed milestones for each phase
-1. Append milestones to phase files
-1. Generate `.wiz/auth-system/IMPLEMENTATION_GUIDE.md`
-1. Display milestone summary
+2. Generate detailed milestones for each phase
+3. Append milestones to phase files
+4. Generate `.wiz/auth-system/IMPLEMENTATION_GUIDE.md`
+5. Display milestone summary
 
 ## Notes
 
@@ -1117,3 +1087,4 @@ This will:
 - Milestone acceptance criteria must be specific and testable
 - Implementation guide provides PRD-specific context and workflow instructions
 - Command delegates to `wiz-planner` subagent (Phase 3 implementation)
+

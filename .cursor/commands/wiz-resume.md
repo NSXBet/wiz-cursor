@@ -1,6 +1,6 @@
-______________________________________________________________________
-
-## description: Resume work on in-progress milestone
+---
+description: Resume work on in-progress milestone
+---
 
 # Resume In-Progress Milestone
 
@@ -9,7 +9,6 @@ You are resuming work on an in-progress milestone using the Wiz Planner workflow
 ## Command Overview
 
 This command loads resume state from `.wiz/.current-milestone.json` (or state.json) and offers options to:
-
 - Continue working on the in-progress milestone
 - Skip to the next TODO milestone
 - Cancel and return to shell
@@ -621,7 +620,6 @@ When complete, the milestone status will be updated automatically.
 When option 1 is chosen, the command implements the milestone directly (no delegation):
 
 **Prompt Template**:
-
 ```
 Resume milestone: {MILESTONE_ID}
 
@@ -682,11 +680,10 @@ When complete, provide:
 ## Interactive Flow
 
 The command is interactive and waits for user input:
-
 1. Display context and options
-1. Read user choice (1-3) - adapt to Cursor interface
-1. Execute chosen action
-1. Provide clear feedback
+2. Read user choice (1-3) - adapt to Cursor interface
+3. Execute chosen action
+4. Provide clear feedback
 
 ## Notes
 
@@ -699,3 +696,4 @@ The command is interactive and waits for user input:
 - Stale or invalid state is automatically cleared
 - Elapsed time calculated from started_at timestamp
 - Supports both legacy `.wiz/.current-milestone.json` and state.json
+

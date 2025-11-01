@@ -1,6 +1,6 @@
-______________________________________________________________________
-
-## description: Display project progress (simplified version)
+---
+description: Display project progress (simplified version)
+---
 
 # Project Status (Simplified)
 
@@ -45,3 +45,4 @@ grep -c '✅ COMPLETE' .wiz/$SLUG/phases/phaseN.md 2>/dev/null || echo "0"
 ## Step 4: Display Summary
 
 Format and display the milestone counts in a readable format.
+

@@ -12,7 +12,7 @@ NC := \033[0m # No Color
 # Directories and files
 BASH_FILES := install.sh run-tests.sh test-install.bats
 MARKDOWN_FILES := $(shell find . -name '*.md' -not -path './.git/*' -not -path './node_modules/*' -not -path './.cursor/*')
-TEST_FILE := test-install.bats
+TEST_FILE := *.bats
 
 help: ## Show this help message
 	@echo "$(BLUE)Available targets:$(NC)"

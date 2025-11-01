@@ -92,11 +92,15 @@ fetch_latest_release() {
 
     if [[ $http_code == "200" ]]; then
         local tag_name
-        tag_name=$(echo "$api_body" | grep -o '"tag_name":"[^"]*' | cut -d'"' -f4)
+        # Handle both "tag_name":"value" and "tag_name": "value" formats
+        tag_name=$(echo "$api_body" | grep -oE '"tag_name"\s*:\s*"[^"]*"' | cut -d'"' -f4)
         if [[ -n $tag_name ]]; then
             echo "$tag_name"
             return 0
         fi
+    elif [[ $http_code == "404" ]]; then
+        # No releases found
+        return 1
     fi
 
     return 1
@@ -111,7 +115,7 @@ determine_version() {
     if [[ -z $provided_version ]]; then
         info "No version specified, fetching latest stable release..."
         local latest_release
-        latest_release=$(fetch_latest_release)
+        latest_release=$(fetch_latest_release) || true
 
         if [[ -n $latest_release ]]; then
             VERSION="$latest_release"
@@ -414,6 +418,13 @@ main() {
 }
 
 # Only run main() if script is executed directly (not sourced for testing)
-if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
+# When piped to bash (curl ... | bash), BASH_SOURCE[0] is empty, so we need to handle that
+if [[ -z ${BASH_SOURCE[0]:-} ]]; then
+    # Script is being piped to bash (curl ... | bash)
+    # BASH_SOURCE[0] is empty, so always run main
+    main "$@"
+elif [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
+    # Script is being executed directly
     main "$@"
 fi
+# If sourced (for testing), BASH_SOURCE[0] != $0, so we don't run main()
