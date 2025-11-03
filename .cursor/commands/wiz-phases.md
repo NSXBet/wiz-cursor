@@ -84,6 +84,82 @@ wiz_log_debug() {
 }
 ```
 
+### Context Loading Functions
+
+```bash
+# wiz_load_context_metadata - Load metadata (frontmatter) from all local context files
+wiz_load_context_metadata() {
+    local context_dir=".wiz/context"
+    local metadata_json="[]"
+    
+    if [[ ! -d "$context_dir" ]]; then
+        echo "[]"
+        return 0
+    fi
+    
+    # Find all .md files and extract frontmatter
+    while IFS= read -r -d '' file; do
+        if [[ -f "$file" ]] && [[ -r "$file" ]]; then
+            local rel_path="${file#$context_dir/}"
+            
+            # Extract frontmatter (between --- and ---)
+            local frontmatter=$(awk '/^---$/{count++; if(count==1) next; if(count==2) exit} {if(count==1) print}' "$file" 2>/dev/null)
+            
+            if [[ -n "$frontmatter" ]]; then
+                # Parse frontmatter into JSON
+                local description=$(echo "$frontmatter" | grep -E "^description:" | sed 's/^description:[[:space:]]*//' | sed 's/^"//;s/"$//' || echo "")
+                
+                # Parse tags (optional)
+                local tags=$(echo "$frontmatter" | grep -E "^tags:" | sed 's/^tags:[[:space:]]*//' | sed "s/^\[//;s/\]$//" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^"//;s/"$//' | jq -R . 2>/dev/null | jq -s . 2>/dev/null || echo "[]")
+                
+                # Parse languages (optional, empty means applies to all)
+                local languages=$(echo "$frontmatter" | grep -E "^languages:" | sed 's/^languages:[[:space:]]*//' | sed "s/^\[//;s/\]$//" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^"//;s/"$//' | jq -R . 2>/dev/null | jq -s . 2>/dev/null || echo "[]")
+                
+                # Parse applies_to (optional, empty means applies to everything)
+                local applies_to=$(echo "$frontmatter" | grep -E "^applies_to:" | sed 's/^applies_to:[[:space:]]*//' | sed "s/^\[//;s/\]$//" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^"//;s/"$//' | jq -R . 2>/dev/null | jq -s . 2>/dev/null || echo "[]")
+                
+                # Build JSON entry (only if description exists)
+                if [[ -n "$description" ]]; then
+                    local entry=$(jq -n \
+                        --arg path "$rel_path" \
+                        --arg desc "$description" \
+                        --argjson tags "$tags" \
+                        --argjson langs "$languages" \
+                        --argjson applies "$applies_to" \
+                        '{
+                            path: $path,
+                            description: $desc,
+                            tags: $tags,
+                            languages: $langs,
+                            applies_to: $applies
+                        }' 2>/dev/null)
+                    
+                    if [[ -n "$entry" ]]; then
+                        metadata_json=$(echo "$metadata_json" | jq --argjson entry "$entry" '. += [$entry]' 2>/dev/null || echo "$metadata_json")
+                    fi
+                fi
+            fi
+        fi
+    done < <(find "$context_dir" -type f -name "*.md" -print0 2>/dev/null | sort -z)
+    
+    echo "$metadata_json"
+}
+
+# wiz_load_context_file - Load full content of a specific context file (without frontmatter)
+wiz_load_context_file() {
+    local context_file="$1"
+    local full_path=".wiz/context/$context_file"
+    
+    if [[ ! -f "$full_path" ]]; then
+        echo ""
+        return 1
+    fi
+    
+    # Return file content (skip frontmatter - everything after second ---)
+    awk '/^---$/{count++; if(count==2) flag=1; next} flag' "$full_path"
+}
+```
+
 ### Validation Functions
 
 ```bash
@@ -490,11 +566,23 @@ wiz_ensure_dir "$PHASES_DIR"
 wiz_log_info "Created phases directory at $PHASES_DIR"
 ```
 
-### Step 3: Invoke wiz-planner Agent
+### Step 3: Load Local Context Metadata
+
+**⚠️ Load context metadata FIRST before delegating to planner.**
+
+```bash
+# Load context metadata FIRST
+CONTEXT_METADATA=$(wiz_load_context_metadata)
+if [[ "$CONTEXT_METADATA" != "[]" ]] && [[ -n "$CONTEXT_METADATA" ]]; then
+    wiz_log_info "Found local context files in .wiz/context/"
+fi
+```
+
+### Step 4: Invoke wiz-planner Agent
 
 The `wiz-planner` agent provides verbose, research-focused planning output suitable for strategic phase decomposition. When you reference `.cursor/agents/wiz-planner.md` in the next step, it will automatically provide comprehensive, detailed phase planning content.
 
-### Step 4: Delegate to wiz-planner Agent
+### Step 5: Delegate to wiz-planner Agent
 
 **⚠️ CRITICAL: Agent File Operation Limitation**
 
@@ -506,10 +594,38 @@ Agents invoked via agent references **cannot reliably write files**. This is a k
 - Agent focuses on: phase analysis, phase generation, content synthesis
 - Main agent handles: all file I/O operations
 
-Reference the `.cursor/agents/wiz-planner.md` agent with the following prompt:
+Reference the `.cursor/agents/wiz-planner.md` agent with the beginning of the following prompt:
 
 ```
 Generate 3-15 implementation phases for PRD: {SLUG}
+
+## Available Local Context
+
+The following local context files are available in `.wiz/context/**/*.md`:
+
+{CONTEXT_METADATA_JSON}
+
+**Your Task:**
+1. Review the metadata above
+2. Identify which context files are relevant for phase generation:
+   - If `applies_to` is empty array → applies to everything (including planning)
+   - If `applies_to` contains "planning" → relevant
+   - If `languages` is empty array → applies to all languages → relevant
+   - If `languages` matches detected languages → relevant
+   - If `tags` or `description` suggest relevance → relevant
+3. Read only the relevant files using: `wiz_load_context_file("<path>")`
+4. Use the loaded context in your phase planning
+
+**CRITICAL**: When local context is loaded:
+- **LOCAL CONTEXT TAKES ABSOLUTE PRECEDENCE** over your default recommendations
+- If local context specifies frameworks → Use those, not your defaults
+- If local context specifies technology choices → Respect those decisions
+- If local context specifies patterns → Use those patterns
+- Only use your defaults when local context doesn't address the topic
+
+**Priority**: Local context > Your recommendations > General best practices
+
+---
 
 ## Your Task
 

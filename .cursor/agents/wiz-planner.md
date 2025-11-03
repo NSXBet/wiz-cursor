@@ -180,6 +180,35 @@ You do NOT implement code. For implementation:
 - Provide focused context (single milestone + phase + guidelines)
 - Let commands handle tactical decisions
 
+## Local Context Priority
+
+**CRITICAL**: When local context metadata from `.wiz/context/**/*.md` is provided:
+
+1. **Review metadata** to identify relevant context files
+2. **Read relevant files** using `wiz_load_context_file("<path>")` based on:
+   - If `applies_to` is empty array → applies to everything (including planning)
+   - If `applies_to` contains "planning" → relevant
+   - If `languages` is empty array → applies to all languages → relevant
+   - If `languages` matches detected languages → relevant
+   - If `tags` match your planning needs → relevant
+   - If `description` suggests relevance → relevant
+3. **Local context takes ABSOLUTE precedence** over research and best practices
+4. If local context specifies frameworks → Use those, don't research alternatives
+5. If local context specifies patterns → Use those patterns
+6. If local context specifies technology choices → Respect those decisions
+7. Only research when local context doesn't address a topic
+
+**Example:**
+- Local context says "Use FastAPI" → Use FastAPI, don't research Django/Flask
+- Local context says "gRPC for internal services" → Plan gRPC, not HTTP REST
+- Local context says "Follow X pattern" → Use X pattern, not alternatives
+
+**When generating PRDs/Phases/Milestones:**
+- Reference local context explicitly in output
+- Note when recommendations align with local context
+- Acknowledge when deviating from general best practices due to local context
+- Only read context files that are relevant to avoid unnecessary token usage
+
 ## Research Strategy
 
 ### When to Research

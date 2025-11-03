@@ -43,7 +43,9 @@ Agents are specialized AI assistants that provide expertise in specific domains.
 **Special Features**:
 
 - Analyzes codebase before generating questions
+- **Reviews local context metadata** and loads relevant files before planning
 - Researches current best practices (2024-2025)
+- **Local context takes absolute precedence** over research and defaults
 - Prioritizes NFRs in order: P0 (Correctness) → P1 (Tests) → P2 (Security) → P3 (Quality) → P4 (Performance)
 
 ______________________________________________________________________
@@ -150,14 +152,27 @@ ______________________________________________________________________
 **Special Features**:
 
 - Conservative approach (when in doubt, HALT)
+- **Reviews local context metadata** and considers local guidance in analysis
 - Grounds analysis in actual codebase context
 - Provides actionable questions and options
+- **Flags conflicts** between milestones and local context
 
 ______________________________________________________________________
 
 ## Language Specialists
 
 Language specialists provide expertise for specific programming languages and frameworks. They are **advisory consultants** that guide implementation but do not write code themselves.
+
+**⚠️ CRITICAL: Local Context Precedence**
+
+All language specialists **MUST defer to local context** when provided:
+1. **Review metadata FIRST** to identify relevant context files
+2. **Read relevant files** using `wiz_load_context_file()` if they apply
+3. **If local context addresses the topic** → Use that guidance, acknowledge it explicitly
+4. **If local context conflicts with recommendations** → Explicitly defer to local context
+5. **If no relevant local context** → Provide expert recommendation as usual
+
+**Priority**: Local context > Specialist recommendations > General best practices
 
 ### wiz-go-specialist
 
@@ -381,6 +396,74 @@ ______________________________________________________________________
 
 - When `Dockerfile` or `docker-compose.yml` files are modified
 - During containerization guidance
+
+______________________________________________________________________
+
+## Local Context Integration
+
+All agents support **local context** from `.wiz/context/**/*.md` with **absolute precedence**.
+
+### How Agents Use Local Context
+
+#### wiz-planner
+
+- Reviews local context metadata before PRD/phase/milestone generation
+- Loads relevant context files based on metadata (tags, languages, applies_to)
+- **Local context takes precedence** over research and best practices
+- Example: If context specifies "Use FastAPI", planner uses FastAPI without researching alternatives
+
+#### wiz-milestone-analyst
+
+- Reviews local context metadata during milestone analysis
+- Checks if milestone requirements align with local context patterns
+- Flags conflicts between milestones and local context (may require human clarification)
+- Considers local context when making PROCEED/HALT decisions
+
+#### Language Specialists
+
+All language specialists (`wiz-go-specialist`, `wiz-typescript-specialist`, `wiz-python-specialist`, `wiz-csharp-specialist`, `wiz-java-specialist`, `wiz-docker-specialist`):
+
+- **Review metadata FIRST** when command agent provides it
+- **Read relevant files** using `wiz_load_context_file()` based on:
+  - If `languages` is empty → applies to all languages
+  - If `languages` includes their language → relevant
+  - If `tags` match the topic → relevant
+- **Explicitly defer** to local context when it conflicts with their recommendations
+- **Acknowledge** when recommendations align with local context
+
+### Example Response Pattern
+
+When local context exists and applies:
+
+```markdown
+## Recommendation
+
+I reviewed available local context and found `frameworks.md` specifies using 
+[X framework] for this scenario. I recommend following that guidance.
+
+[Recommendation based on local context]
+
+## Rationale
+
+[Why local context's approach fits, or acknowledge if normally recommending something else]
+```
+
+### Context File Relevance
+
+Agents determine relevance based on:
+- **Empty arrays**: If `languages` or `applies_to` is empty, applies to everything
+- **Language matching**: If `languages` includes detected/relevant language
+- **Tag matching**: If `tags` match the topic (e.g., "frameworks", "patterns")
+- **Description relevance**: If description suggests applicability
+
+### Benefits
+
+- **Token efficient**: Only loads relevant files
+- **Project-aware**: Agents respect project-specific decisions
+- **Consistent**: Same context used across planning and execution
+- **Flexible**: Users organize context files however they want
+
+See [README.md](../README.md#local-context-support) for context file examples and detailed usage.
 
 ______________________________________________________________________
 

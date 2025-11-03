@@ -469,6 +469,103 @@ Wiz enforces strict quality standards with zero tolerance:
 
 **Zero tolerance policy**: No failing tests, no lint errors, no skipped tests. The entire codebase must be healthy, not just new code.
 
+## Local Context Support
+
+Wiz respects user-provided local context for project-specific guidance. Context files use frontmatter metadata to enable intelligent, selective loading.
+
+### Creating Local Context
+
+Create markdown files in `.wiz/context/**/*.md` with YAML frontmatter. Each file MUST include a `description` field, and can optionally include tags, languages, and applies_to fields.
+
+**Required Frontmatter:**
+- `description`: Brief description of what this context covers
+
+**Optional Frontmatter:**
+- `tags`: Array of tags (e.g., `[frameworks, architecture, patterns]`)
+- `languages`: Array of languages this applies to (e.g., `[go, typescript]`)
+  - If omitted, applies to all languages
+- `applies_to`: Array of when this applies (e.g., `[planning, execution, review]`)
+  - If omitted, applies to everything (planning, execution, review)
+
+**Example `.wiz/context/frameworks.md`:**
+
+```markdown
+---
+description: Preferred frameworks and libraries for this project
+tags: [frameworks, libraries, dependencies]
+languages: [python, typescript]
+applies_to: [planning, execution]
+---
+
+# Preferred Frameworks
+
+- **Backend**: FastAPI for APIs, SQLAlchemy for ORM
+- **Testing**: pytest with pytest-asyncio
+- **HTTP Client**: httpx (not requests)
+- **Background Jobs**: Celery with Redis
+```
+
+**Example `.wiz/context/technologies.md`:**
+
+```markdown
+---
+description: Technology decisions for service communication and protocols
+tags: [architecture, protocols, communication]
+applies_to: [planning, execution]
+---
+
+# Technology Decisions
+
+## gRPC vs HTTP REST
+
+- Use **gRPC** for internal service-to-service communication
+- Use **HTTP REST** for external/public APIs
+- Use **WebSockets** for real-time features (not Server-Sent Events)
+```
+
+### How Local Context Works
+
+1. **Metadata Loading**: Commands load frontmatter metadata from all context files
+2. **Intelligent Selection**: AI reviews metadata and decides which files are relevant
+3. **Selective Reading**: Only relevant context files are fully loaded (saves tokens)
+4. **Highest Priority**: Local context takes precedence over all specialist recommendations
+5. **Planning**: `/wiz-prd`, `/wiz-phases`, `/wiz-milestones` check metadata and load relevant context
+6. **Execution**: `/wiz-next` and `/wiz-auto` check metadata and load relevant context before consulting specialists
+7. **Specialists**: Language specialists check metadata and read relevant files before providing recommendations
+
+### Local Context Examples
+
+**`.wiz/context/go/patterns.md`:**
+```markdown
+---
+description: Go-specific patterns and conventions for this project
+tags: [patterns, conventions, go]
+languages: [go]
+applies_to: [execution]
+---
+
+# Go Patterns
+
+- Use `uber/fx` for dependency injection
+- Prefer `xsync/v4` for concurrent maps (not sync.Map)
+- Use `uber/zap` for logging
+```
+
+**`.wiz/context/architecture.md`:**
+```markdown
+---
+description: High-level architectural decisions and patterns
+tags: [architecture, design, patterns]
+applies_to: [planning]
+---
+
+# Architecture Decisions
+
+- Microservices communicate via gRPC
+- Database per service pattern
+- Event-driven architecture with Kafka
+```
+
 ## 📁 Project Structure
 
 Wiz creates a `.wiz/` directory in your project root:

@@ -442,6 +442,82 @@ wiz_ensure_dir() {
 }
 ```
 
+### Context Loading Functions
+
+```bash
+# wiz_load_context_metadata - Load metadata (frontmatter) from all local context files
+wiz_load_context_metadata() {
+    local context_dir=".wiz/context"
+    local metadata_json="[]"
+    
+    if [[ ! -d "$context_dir" ]]; then
+        echo "[]"
+        return 0
+    fi
+    
+    # Find all .md files and extract frontmatter
+    while IFS= read -r -d '' file; do
+        if [[ -f "$file" ]] && [[ -r "$file" ]]; then
+            local rel_path="${file#$context_dir/}"
+            
+            # Extract frontmatter (between --- and ---)
+            local frontmatter=$(awk '/^---$/{count++; if(count==1) next; if(count==2) exit} {if(count==1) print}' "$file" 2>/dev/null)
+            
+            if [[ -n "$frontmatter" ]]; then
+                # Parse frontmatter into JSON
+                local description=$(echo "$frontmatter" | grep -E "^description:" | sed 's/^description:[[:space:]]*//' | sed 's/^"//;s/"$//' || echo "")
+                
+                # Parse tags (optional)
+                local tags=$(echo "$frontmatter" | grep -E "^tags:" | sed 's/^tags:[[:space:]]*//' | sed "s/^\[//;s/\]$//" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^"//;s/"$//' | jq -R . 2>/dev/null | jq -s . 2>/dev/null || echo "[]")
+                
+                # Parse languages (optional, empty means applies to all)
+                local languages=$(echo "$frontmatter" | grep -E "^languages:" | sed 's/^languages:[[:space:]]*//' | sed "s/^\[//;s/\]$//" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^"//;s/"$//' | jq -R . 2>/dev/null | jq -s . 2>/dev/null || echo "[]")
+                
+                # Parse applies_to (optional, empty means applies to everything)
+                local applies_to=$(echo "$frontmatter" | grep -E "^applies_to:" | sed 's/^applies_to:[[:space:]]*//' | sed "s/^\[//;s/\]$//" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^"//;s/"$//' | jq -R . 2>/dev/null | jq -s . 2>/dev/null || echo "[]")
+                
+                # Build JSON entry (only if description exists)
+                if [[ -n "$description" ]]; then
+                    local entry=$(jq -n \
+                        --arg path "$rel_path" \
+                        --arg desc "$description" \
+                        --argjson tags "$tags" \
+                        --argjson langs "$languages" \
+                        --argjson applies "$applies_to" \
+                        '{
+                            path: $path,
+                            description: $desc,
+                            tags: $tags,
+                            languages: $langs,
+                            applies_to: $applies
+                        }' 2>/dev/null)
+                    
+                    if [[ -n "$entry" ]]; then
+                        metadata_json=$(echo "$metadata_json" | jq --argjson entry "$entry" '. += [$entry]' 2>/dev/null || echo "$metadata_json")
+                    fi
+                fi
+            fi
+        fi
+    done < <(find "$context_dir" -type f -name "*.md" -print0 2>/dev/null | sort -z)
+    
+    echo "$metadata_json"
+}
+
+# wiz_load_context_file - Load full content of a specific context file (without frontmatter)
+wiz_load_context_file() {
+    local context_file="$1"
+    local full_path=".wiz/context/$context_file"
+    
+    if [[ ! -f "$full_path" ]]; then
+        echo ""
+        return 1
+    fi
+    
+    # Return file content (skip frontmatter - everything after second ---)
+    awk '/^---$/{count++; if(count==2) flag=1; next} flag' "$full_path"
+}
+```
+
 ### State Management Functions
 
 ```bash
@@ -689,9 +765,23 @@ wiz_log_info "Created directory structure at $PRD_DIR"
 
 The `wiz-planner` agent provides verbose, research-focused planning output suitable for strategic planning activities. When you reference `.cursor/agents/wiz-planner.md` in the next step, it will automatically provide comprehensive, detailed planning content.
 
-### Step 4: Analyze Codebase (BEFORE Question Generation)
+### Step 4: Load Local Context Metadata
 
-**⚠️ CRITICAL: Analyze codebase FIRST to avoid asking obvious questions.**
+**⚠️ Load context metadata FIRST before codebase analysis.**
+
+```bash
+# Load context metadata FIRST
+CONTEXT_METADATA=$(wiz_load_context_metadata)
+if [[ "$CONTEXT_METADATA" != "[]" ]] && [[ -n "$CONTEXT_METADATA" ]]; then
+    wiz_log_info "Found local context files in .wiz/context/"
+    # Log available context files
+    echo "$CONTEXT_METADATA" | jq -r '.[] | "  - \(.path): \(.description)"' || true
+fi
+```
+
+### Step 5: Analyze Codebase (BEFORE Question Generation)
+
+**⚠️ CRITICAL: Analyze codebase AFTER loading context metadata to avoid asking obvious questions.**
 
 Before delegating to the agent, perform codebase analysis:
 
@@ -776,7 +866,7 @@ wiz_log_info "File counts - Go: $GO_FILES, TS: $TS_FILES, Python: $PY_FILES, C#:
 
 The analysis results will be provided to the agent to inform question generation and prevent asking obvious questions.
 
-### Step 5: Delegate to wiz-planner Agent
+### Step 6: Delegate to wiz-planner Agent
 
 **⚠️ CRITICAL: Agent File Operation Limitation**
 
@@ -826,6 +916,34 @@ Use this information to:
 - Skip questions about things already determined (e.g., if primary language is clearly Go, don't ask "what language?" but instead ask "Confirm Go or specify different language(s) if needed?")
 - Make questions context-aware (e.g., if benchmarks already exist, ask "Extend existing benchmarking or change policy?")
 - Focus on aspects that require HUMAN JUDGMENT and DECISION-MAKING
+
+## Available Local Context
+
+The following local context files are available in `.wiz/context/**/*.md`:
+
+{CONTEXT_METADATA_JSON}
+
+**Your Task:**
+1. Review the metadata above
+2. Identify which context files are relevant for PRD generation:
+   - If `applies_to` is empty array → applies to everything (including planning)
+   - If `applies_to` contains "planning" → relevant
+   - If `languages` is empty array → applies to all languages → relevant
+   - If `languages` matches detected languages → relevant
+   - If `tags` or `description` suggest relevance → relevant
+3. Read only the relevant files using: `wiz_load_context_file("<path>")`
+4. Use the loaded context in your planning
+
+**CRITICAL**: When local context is loaded:
+- **LOCAL CONTEXT TAKES ABSOLUTE PRECEDENCE** over your default recommendations
+- If local context specifies frameworks → Use those, not your defaults
+- If local context specifies technology choices → Respect those decisions
+- If local context specifies patterns → Use those patterns
+- Only use your defaults when local context doesn't address the topic
+
+**Priority**: Local context > Your recommendations > General best practices
+
+---
 
 ## Your Task
 

@@ -25,9 +25,20 @@ When evaluating a milestone, consider:
 
 **Technical Context:**
 - Existing codebase patterns and architecture
+- **Local context guidance (if provided)** - check metadata, read relevant files using `wiz_load_context_file("<path>")`
 - Related files and dependencies
 - Previous milestones in the same phase
 - Design guidelines for relevant languages
+
+**Local Context Consideration:**
+- If local context metadata is provided, review it to identify relevant files
+- If `applies_to` is empty → applies to everything (including execution/planning)
+- If `applies_to` includes "execution" or "planning" → relevant
+- If `languages` is empty → applies to all languages → relevant
+- If `languages` matches detected language → relevant
+- If local context provides guidance for this milestone:
+  - Note if milestone requirements align with local context patterns
+  - Flag if milestone conflicts with local context (may need human clarification)
 
 **Complexity Indicators:**
 - Number and clarity of acceptance criteria
@@ -265,8 +276,19 @@ Bulk deletion operations are high-risk and often have compliance implications. N
 ### Step 2: Gather Context
 - Search for related files and patterns
 - Check for existing implementations
+- **Review local context metadata from `.wiz/context/**/*.md` (if provided)**
+  - If relevant context files exist, read them using `wiz_load_context_file("<path>")`
+  - If `applies_to` is empty → applies to everything (including execution/planning)
+  - If `applies_to` includes "execution" or "planning" → relevant
+  - If `languages` is empty → applies to all languages → relevant
+  - If `languages` matches detected language → relevant
 - Review design guidelines for relevant languages
 - Check previous milestones in the phase
+
+**When local context exists:**
+- Consider if local context provides guidance for this milestone
+- Note if milestone requirements align with local context patterns
+- Flag if milestone conflicts with local context (may need human clarification)
 
 ### Step 3: Identify Decision Points
 - Are there multiple valid approaches?

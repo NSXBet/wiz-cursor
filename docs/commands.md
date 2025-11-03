@@ -55,8 +55,10 @@ ______________________________________________________________________
 
 - ⚠️ Questions MUST be answered by HUMAN, NOT by AI
 - Command analyzes codebase first to skip obvious questions
+- **Loads local context metadata** from `.wiz/context/**/*.md` before generating questions
 - Research phase uses WebSearch/WebFetch for current best practices
 - PRD includes overview, requirements, architecture, success criteria, risks, and implementation notes
+- **Local context takes precedence** over research and default recommendations
 
 ______________________________________________________________________
 
@@ -105,9 +107,11 @@ ______________________________________________________________________
 
 **Important Notes**:
 
+- **Loads local context metadata** from `.wiz/context/**/*.md` before generating phases
 - Phases build on each other logically
 - Each phase delivers working functionality
 - Design guidelines generated for each detected language
+- **Local context takes precedence** over default recommendations
 
 ______________________________________________________________________
 
@@ -166,9 +170,11 @@ ______________________________________________________________________
 
 **Important Notes**:
 
+- **Loads local context metadata** from `.wiz/context/**/*.md` before generating milestones
 - Milestones are ~1 hour each (30 minutes to 2 hours acceptable)
 - Each milestone has clear, testable acceptance criteria
 - Milestones include NFR requirements (P0-P4)
+- **Local context takes precedence** over default recommendations
 
 ______________________________________________________________________
 
@@ -201,6 +207,13 @@ ______________________________________________________________________
 1. **Specialist Review**: Language specialists review diff
 1. **Create Commit**: Creates properly formatted commit
 1. **Update Status**: Marks milestone as COMPLETE
+
+**Context Loading**:
+
+- **Loads local context metadata FIRST** from `.wiz/context/**/*.md` before design guidelines
+- AI reviews metadata and loads only relevant context files
+- Local context shared with language specialists during consultation
+- **Local context takes precedence** over specialist recommendations
 
 **Quality Gates**:
 
@@ -265,6 +278,13 @@ ______________________________________________________________________
 1. **If PROCEED**: Execute current milestone (same as `/wiz-next`)
 1. **If HALT**: Present questions to user and wait for input
 1. **Repeat**: Loop until no more milestones or max reached
+
+**Context Loading**:
+
+- **Loads local context metadata ONCE** before loop (reuses inside loop)
+- AI reviews metadata and loads only relevant context files per milestone
+- Local context shared with language specialists during consultation
+- **Local context takes precedence** over specialist recommendations
 
 **Gating Logic**:
 
@@ -598,6 +618,47 @@ ______________________________________________________________________
 - Extracts information from command files automatically
 - Shows examples from command documentation
 - Links to complete documentation
+
+______________________________________________________________________
+
+## Local Context Integration
+
+All planning and execution commands support **local context** from `.wiz/context/**/*.md`:
+
+### How It Works
+
+1. **Metadata Loading**: Commands call `wiz_load_context_metadata()` which extracts frontmatter from all context files
+2. **Intelligent Selection**: AI reviews metadata (description, tags, languages, applies_to) and selects relevant files
+3. **Selective Reading**: Only relevant files are fully loaded using `wiz_load_context_file()` to save tokens
+4. **Precedence**: Local context takes **absolute precedence** over specialist recommendations and research
+
+### Context File Format
+
+Context files use YAML frontmatter with:
+- `description` (required): Brief description
+- `tags` (optional): Array of tags for categorization
+- `languages` (optional): Array of languages (empty = all languages)
+- `applies_to` (optional): Array of stages (empty = all stages)
+
+### Commands That Use Local Context
+
+| Command | When Context Loaded | Usage |
+|---------|---------------------|-------|
+| `/wiz-prd` | Before question generation | Influences questions and PRD recommendations |
+| `/wiz-phases` | Before phase generation | Influences phase structure and technology choices |
+| `/wiz-milestones` | Before milestone generation | Influences milestone tasks and patterns |
+| `/wiz-next` | Before design guidelines | Influences implementation approach |
+| `/wiz-auto` | Once before loop | Influences implementation approach for all milestones |
+
+### Example Context Usage
+
+If `.wiz/context/frameworks.md` specifies "Use FastAPI":
+- `/wiz-prd` won't ask about framework choice → assumes FastAPI
+- `/wiz-phases` plans phases with FastAPI in mind
+- `/wiz-next` and language specialists recommend FastAPI patterns
+- All other recommendations defer to FastAPI choice
+
+See [README.md](../README.md#local-context-support) for detailed examples and usage.
 
 ______________________________________________________________________
 
