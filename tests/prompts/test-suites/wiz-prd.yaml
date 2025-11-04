@@ -1,0 +1,73 @@
+# Promptfoo test suite for /wiz-prd command
+# Tests PRD generation with context integration
+
+description: 'Test /wiz-prd command with various context scenarios'
+
+providers:
+  - openai:gpt-4o-mini
+
+tests:
+  # Test 1: PRD generation with framework context
+  - vars:
+      command: wiz-prd
+      slug: test-auth-system
+      idea: "Add user authentication with email/password and OAuth"
+      context_files:
+        - tests/fixtures/context/frameworks.md
+      codebase_language: python
+    assert:
+      - type: contains
+        value: FastAPI
+        threshold: 0.8
+      - type: contains
+        value: pytest
+        threshold: 0.8
+      - type: javascript
+        value: |
+          const hasOverview = output.includes('overview') || output.includes('Overview');
+          const hasRequirements = output.includes('requirements') || output.includes('Requirements');
+          const hasArchitecture = output.includes('architecture') || output.includes('Architecture');
+          return hasOverview && hasRequirements && hasArchitecture;
+      - type: javascript
+        value: |
+          // Verify context was used (should mention FastAPI)
+          return output.includes('FastAPI') || output.includes('fastapi');
+    options:
+      temperature: 0.3
+
+  # Test 2: PRD generation with Go-specific context
+  - vars:
+      command: wiz-prd
+      slug: test-go-service
+      idea: "Create a REST API service for user management"
+      context_files:
+        - tests/fixtures/context/go/patterns.md
+      codebase_language: go
+    assert:
+      - type: contains
+        value: Go
+        threshold: 0.8
+      - type: javascript
+        value: |
+          // Should mention Go patterns or testing approach
+          return output.includes('test') || output.includes('Go') || output.includes('golang');
+    options:
+      temperature: 0.3
+
+  # Test 3: PRD generation without context (empty context)
+  - vars:
+      command: wiz-prd
+      slug: test-no-context
+      idea: "Build a simple todo application"
+      context_files: []
+      codebase_language: typescript
+    assert:
+      - type: javascript
+        value: |
+          // Should still generate valid PRD structure
+          const hasOverview = output.includes('overview') || output.includes('Overview');
+          const hasRequirements = output.includes('requirements') || output.includes('Requirements');
+          return hasOverview && hasRequirements;
+    options:
+      temperature: 0.3
+

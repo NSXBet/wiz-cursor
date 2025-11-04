@@ -1,0 +1,28 @@
+# Promptfoo test suite for /wiz-auto command
+# Tests automated milestone execution loop with context integration
+
+description: 'Test /wiz-auto command with context integration'
+
+providers:
+  - openai:gpt-4o-mini
+
+tests:
+  # Test 1: Automated execution with context
+  - vars:
+      command: wiz-auto
+      slug: test-auto
+      count: 3
+      context_files:
+        - tests/fixtures/context/frameworks.md
+    assert:
+      - type: javascript
+        value: |
+          // Should execute multiple milestones
+          return output.includes('milestone') || output.includes('progress');
+      - type: javascript
+        value: |
+          // Should use context consistently
+          return output.includes('FastAPI') || output.includes('context');
+    options:
+      temperature: 0.3
+

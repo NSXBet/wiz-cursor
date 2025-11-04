@@ -1,0 +1,286 @@
+# Promptfoo configuration for Wiz integration tests
+# See: https://www.promptfoo.dev/docs/configuration/
+#
+# NOTE: These tests require OpenAI API key to be set in environment variable OPENAI_API_KEY
+# To run: OPENAI_API_KEY=your_key make test-prompts
+# Or skip if you don't have API access
+
+description: 'Wiz Planner Integration Tests - PRD Question Generation'
+
+providers:
+  - openai:gpt-4o-mini  # Using cheaper model for testing
+
+defaultTest:
+  options:
+    temperature: 0.3  # Lower temperature for more consistent results
+
+# Prompt template for /wiz-prd question generation
+prompts:
+  - |
+    Generate clarifying questions for a PRD about: {{idea}}
+
+    ## ⚠️ CRITICAL INSTRUCTIONS
+
+    **DO NOT ANSWER THE QUESTIONS YOURSELF.** These questions are for the HUMAN USER to answer. Your job is ONLY to generate the questions, not to answer them.
+
+    **USE CODEBASE ANALYSIS:** I've analyzed the codebase and found:
+    {{codebase_analysis}}
+
+    **Example:** If primary_language is "go" with 500+ files, DON'T ask "What language?" - instead ask "Detected primary language: Go (from codebase analysis). Confirm Go or specify different language(s) if needed?"
+
+    Use this information to:
+    - Skip questions about things already determined (e.g., if primary language is clearly Go, don't ask "what language?" but instead ask "Confirm Go or specify different language(s) if needed?")
+    - Make questions context-aware (e.g., if benchmarks already exist, ask "Extend existing benchmarking or change policy?")
+    - Focus on aspects that require HUMAN JUDGMENT and DECISION-MAKING
+
+    ## Available Local Context
+
+    The following local context files are available in `.wiz/context/**/*.md`:
+
+    {{context_metadata}}
+
+    **Your Task:**
+    1. Review the metadata above
+    2. Identify which context files are relevant for PRD generation
+    3. Use the loaded context in your planning
+
+    **CRITICAL**: When local context is loaded:
+    - **LOCAL CONTEXT TAKES ABSOLUTE PRECEDENCE** over your default recommendations
+    - If local context specifies frameworks → Use those, not your defaults
+    - If local context specifies technology choices → Respect those decisions
+    - If local context specifies patterns → Use those patterns
+
+    **Priority**: Local context > Your recommendations > General best practices
+
+    Return questions as JSON array with index, question, and rationale fields.
+
+tests:
+  # PRD Tests - Language Variations
+  # Test 1: Go codebase with framework context
+  - description: 'PRD: Go codebase with framework context'
+    vars:
+      idea: "Add user authentication system"
+      codebase_analysis: '{"primary_language": "go", "language_file_counts": {"go": 50, "typescript": 0, "python": 0, "csharp": 0, "java": 0}, "has_test_infrastructure": 10, "has_benchmarks": "no", "has_fuzzing": "no"}'
+      context_metadata: '[{"path": "frameworks.md", "description": "Framework specifications", "tags": ["frameworks"], "languages": [], "applies_to": ["planning", "execution"]}]'
+    assert:
+      - type: javascript
+        value: |
+          const hasQuestions = output.includes('question') || output.includes('index');
+          const hasAnswers = output.match(/answer[:\s]/i);
+          return hasQuestions && !hasAnswers;
+      - type: javascript
+        value: |
+          const shouldNotAskBasicLanguage = !output.match(/what.*language/i);
+          return shouldNotAskBasicLanguage;
+      - type: javascript
+        value: |
+          try {
+            const jsonMatch = output.match(/```json\s*(\[[\s\S]*?\])/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[1]);
+              return Array.isArray(parsed) && parsed.length > 0;
+            }
+            return false;
+          } catch { return false; }
+
+  # Test 2: TypeScript codebase, no context
+  - description: 'PRD: TypeScript codebase, no local context'
+    vars:
+      idea: "Build a simple todo application"
+      codebase_analysis: '{"primary_language": "typescript", "language_file_counts": {"go": 0, "typescript": 30, "python": 0, "csharp": 0, "java": 0}, "has_test_infrastructure": 5, "has_benchmarks": "no", "has_fuzzing": "no"}'
+      context_metadata: '[]'
+    assert:
+      - type: javascript
+        value: |
+          const hasQuestions = output.includes('question') || output.includes('index');
+          return hasQuestions;
+      - type: javascript
+        value: |
+          try {
+            const jsonMatch = output.match(/```json\s*(\[[\s\S]*?\])/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[1]);
+              return Array.isArray(parsed) && parsed.length > 0 && parsed[0].hasOwnProperty('question');
+            }
+            return false;
+          } catch { return false; }
+
+  # Test 3: Python codebase with FastAPI context
+  - description: 'PRD: Python codebase with FastAPI framework context'
+    vars:
+      idea: "Create REST API for user management"
+      codebase_analysis: '{"primary_language": "python", "language_file_counts": {"go": 0, "typescript": 0, "python": 100, "csharp": 0, "java": 0}, "has_test_infrastructure": 20, "has_benchmarks": "yes", "has_fuzzing": "no"}'
+      context_metadata: '[{"path": "frameworks.md", "description": "Use FastAPI for Python web applications", "tags": ["frameworks"], "languages": ["python"], "applies_to": ["planning"]}]'
+    assert:
+      - type: javascript
+        value: |
+          const hasQuestions = output.includes('question') || output.includes('index');
+          return hasQuestions;
+      - type: javascript
+        value: |
+          try {
+            const jsonMatch = output.match(/```json\s*(\[[\s\S]*?\])/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[1]);
+              return Array.isArray(parsed) && parsed.length > 0 && 
+                     parsed[0].hasOwnProperty('question') && 
+                     parsed[0].hasOwnProperty('rationale');
+            }
+            return false;
+          } catch { return false; }
+
+  # Test 4: Go codebase with nested context (language-specific patterns)
+  - description: 'PRD: Go codebase with nested language-specific context'
+    vars:
+      idea: "Add Go service with authentication"
+      codebase_analysis: '{"primary_language": "go", "language_file_counts": {"go": 200, "typescript": 0, "python": 0, "csharp": 0, "java": 0}, "has_test_infrastructure": 50, "has_benchmarks": "no", "has_fuzzing": "no"}'
+      context_metadata: '[{"path": "go/patterns.md", "description": "Go-specific patterns and best practices", "tags": ["patterns", "go"], "languages": ["go"], "applies_to": ["planning", "execution"]}]'
+    assert:
+      - type: javascript
+        value: |
+          const hasQuestions = output.includes('question') || output.includes('index');
+          return hasQuestions;
+      - type: javascript
+        value: |
+          try {
+            const jsonMatch = output.match(/```json\s*(\[[\s\S]*?\])/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[1]);
+              return Array.isArray(parsed) && parsed.length > 0;
+            }
+            return false;
+          } catch { return false; }
+
+  # Test 5: C# codebase with existing benchmarks
+  - description: 'PRD: C# codebase with existing benchmarking infrastructure'
+    vars:
+      idea: "Implement performance monitoring dashboard"
+      codebase_analysis: '{"primary_language": "csharp", "language_file_counts": {"go": 0, "typescript": 0, "python": 0, "csharp": 150, "java": 0}, "has_test_infrastructure": 30, "has_benchmarks": "yes", "has_fuzzing": "no"}'
+      context_metadata: '[]'
+    assert:
+      - type: javascript
+        value: |
+          const hasQuestions = output.includes('question') || output.includes('index');
+          return hasQuestions;
+      - type: javascript
+        value: |
+          try {
+            const jsonMatch = output.match(/```json\s*(\[[\s\S]*?\])/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[1]);
+              return Array.isArray(parsed) && parsed.length > 0;
+            }
+            return false;
+          } catch { return false; }
+
+  # Test 6: Java codebase with multiple context files
+  - description: 'PRD: Java codebase with multiple context files'
+    vars:
+      idea: "Add microservice for payment processing"
+      codebase_analysis: '{"primary_language": "java", "language_file_counts": {"go": 0, "typescript": 0, "python": 0, "csharp": 0, "java": 300}, "has_test_infrastructure": 100, "has_benchmarks": "yes", "has_fuzzing": "yes"}'
+      context_metadata: '[{"path": "frameworks.md", "description": "Use Spring Boot", "tags": ["frameworks"], "languages": ["java"], "applies_to": ["planning"]}, {"path": "testing.md", "description": "Use JUnit 5", "tags": ["testing"], "languages": ["java"], "applies_to": ["planning", "execution"]}]'
+    assert:
+      - type: javascript
+        value: |
+          const hasQuestions = output.includes('question') || output.includes('index');
+          return hasQuestions;
+      - type: javascript
+        value: |
+          try {
+            const jsonMatch = output.match(/```json\s*(\[[\s\S]*?\])/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[1]);
+              return Array.isArray(parsed) && parsed.length > 0;
+            }
+            return false;
+          } catch { return false; }
+
+  # Test 7: Simple idea (fewer questions expected)
+  - description: 'PRD: Simple feature idea'
+    vars:
+      idea: "Add a button to export data"
+      codebase_analysis: '{"primary_language": "typescript", "language_file_counts": {"go": 0, "typescript": 25, "python": 0, "csharp": 0, "java": 0}, "has_test_infrastructure": 3, "has_benchmarks": "no", "has_fuzzing": "no"}'
+      context_metadata: '[]'
+    assert:
+      - type: javascript
+        value: |
+          const hasQuestions = output.includes('question') || output.includes('index');
+          return hasQuestions;
+      - type: javascript
+        value: |
+          try {
+            const jsonMatch = output.match(/```json\s*(\[[\s\S]*?\])/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[1]);
+              return Array.isArray(parsed) && parsed.length > 0 && parsed.length <= 15;
+            }
+            return false;
+          } catch { return false; }
+
+  # Test 8: Complex system idea (more questions expected)
+  - description: 'PRD: Complex system idea'
+    vars:
+      idea: "Build distributed real-time analytics platform with machine learning capabilities"
+      codebase_analysis: '{"primary_language": "python", "language_file_counts": {"go": 0, "typescript": 0, "python": 200, "csharp": 0, "java": 0}, "has_test_infrastructure": 50, "has_benchmarks": "yes", "has_fuzzing": "no"}'
+      context_metadata: '[{"path": "frameworks.md", "description": "Use FastAPI and Apache Kafka", "tags": ["frameworks"], "languages": ["python"], "applies_to": ["planning"]}]'
+    assert:
+      - type: javascript
+        value: |
+          const hasQuestions = output.includes('question') || output.includes('index');
+          return hasQuestions;
+      - type: javascript
+        value: |
+          try {
+            const jsonMatch = output.match(/```json\s*(\[[\s\S]*?\])/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[1]);
+              // Complex ideas should generate more questions, but allow flexibility
+              // Minimum 5 questions (basic requirements), but typically 8+ for complex systems
+              return Array.isArray(parsed) && parsed.length >= 5 && parsed[0].hasOwnProperty('question');
+            }
+            return false;
+          } catch { return false; }
+
+  # Test 9: Multi-language codebase
+  - description: 'PRD: Multi-language codebase (Go + TypeScript)'
+    vars:
+      idea: "Add new API endpoint with frontend"
+      codebase_analysis: '{"primary_language": "go", "language_file_counts": {"go": 100, "typescript": 80, "python": 0, "csharp": 0, "java": 0}, "has_test_infrastructure": 20, "has_benchmarks": "no", "has_fuzzing": "no"}'
+      context_metadata: '[]'
+    assert:
+      - type: javascript
+        value: |
+          const hasQuestions = output.includes('question') || output.includes('index');
+          return hasQuestions;
+      - type: javascript
+        value: |
+          try {
+            const jsonMatch = output.match(/```json\s*(\[[\s\S]*?\])/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[1]);
+              return Array.isArray(parsed) && parsed.length > 0;
+            }
+            return false;
+          } catch { return false; }
+
+  # Test 10: Codebase with fuzzing infrastructure
+  - description: 'PRD: Codebase with existing fuzzing infrastructure'
+    vars:
+      idea: "Add new input validation layer"
+      codebase_analysis: '{"primary_language": "go", "language_file_counts": {"go": 150, "typescript": 0, "python": 0, "csharp": 0, "java": 0}, "has_test_infrastructure": 40, "has_benchmarks": "yes", "has_fuzzing": "yes"}'
+      context_metadata: '[]'
+    assert:
+      - type: javascript
+        value: |
+          const hasQuestions = output.includes('question') || output.includes('index');
+          return hasQuestions;
+      - type: javascript
+        value: |
+          try {
+            const jsonMatch = output.match(/```json\s*(\[[\s\S]*?\])/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[1]);
+              return Array.isArray(parsed) && parsed.length > 0;
+            }
+            return false;
+          } catch { return false; }

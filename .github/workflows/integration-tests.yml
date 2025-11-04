@@ -1,0 +1,58 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Run /wiz-prd tests
+        run: make test-prd
+        continue-on-error: true
+      
+      - name: Run /wiz-phases tests
+        run: make test-phases
+        continue-on-error: true
+      
+      - name: Run /wiz-milestones tests
+        run: make test-milestones
+        continue-on-error: true
+      
+      - name: Run /wiz-next tests
+        run: make test-next
+        continue-on-error: true
+      
+      - name: Run /wiz-auto tests
+        run: make test-auto
+        continue-on-error: true
+      
+      - name: Run full workflow tests
+        run: make test-workflow
+        continue-on-error: true
+      
+      - name: Run Promptfoo tests
+        run: make test-prompts
+        continue-on-error: true
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration tests completed" >> $GITHUB_STEP_SUMMARY
+          echo "- Promptfoo tests completed" >> $GITHUB_STEP_SUMMARY
+

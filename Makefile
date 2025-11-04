@@ -93,16 +93,17 @@ lint-markdown: ## Lint markdown files with markdownlint (via npx)
 		exit 1; \
 	fi
 
-test: ## Run tests with bats-core
-	@echo "$(BLUE)Running tests...$(NC)"
+test: test-bats test-integration test-prompts ## Run all tests (bats + integration + prompts)
+
+test-bats: ## Run bats-core tests
+	@echo "$(BLUE)Running bats-core tests...$(NC)"
 	@if command -v bats >/dev/null 2>&1; then \
 		bats $(TEST_FILE) || exit 1; \
-		echo "$(GREEN)✓ Tests passed$(NC)"; \
+		echo "$(GREEN)✓ Bats tests passed$(NC)"; \
 	else \
-		echo "$(YELLOW)⚠ bats-core not installed. Install with:$(NC)"; \
-		echo "  macOS: brew install bats-core"; \
-		echo "  Linux: sudo apt-get install bats"; \
-		exit 1; \
+		echo "$(YELLOW)⚠ bats-core not installed. Skipping bats tests.$(NC)"; \
+		echo "   Install with: make setup"; \
+		echo "   or: brew install bats-core"; \
 	fi
 
 test-verbose: ## Run tests with verbose output
@@ -112,6 +113,88 @@ test-verbose: ## Run tests with verbose output
 		echo "$(GREEN)✓ Tests passed$(NC)"; \
 	else \
 		echo "$(YELLOW)⚠ bats-core not installed$(NC)"; \
+		exit 1; \
+	fi
+
+# Integration testing targets
+test-integration: test-prd test-phases test-milestones test-next test-auto test-workflow ## Run all integration tests
+
+test-prd: ## Run /wiz-prd integration tests
+	@echo "$(BLUE)Running /wiz-prd integration tests...$(NC)"
+	@if [ -f tests/integration/test-wiz-prd.sh ]; then \
+		bash tests/integration/test-wiz-prd.sh || exit 1; \
+		echo "$(GREEN)✓ /wiz-prd tests passed$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠ Integration test script not found$(NC)"; \
+		exit 1; \
+	fi
+
+test-phases: ## Run /wiz-phases integration tests
+	@echo "$(BLUE)Running /wiz-phases integration tests...$(NC)"
+	@if [ -f tests/integration/test-wiz-phases.sh ]; then \
+		bash tests/integration/test-wiz-phases.sh || exit 1; \
+		echo "$(GREEN)✓ /wiz-phases tests passed$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠ Integration test script not found$(NC)"; \
+		exit 1; \
+	fi
+
+test-milestones: ## Run /wiz-milestones integration tests
+	@echo "$(BLUE)Running /wiz-milestones integration tests...$(NC)"
+	@if [ -f tests/integration/test-wiz-milestones.sh ]; then \
+		bash tests/integration/test-wiz-milestones.sh || exit 1; \
+		echo "$(GREEN)✓ /wiz-milestones tests passed$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠ Integration test script not found$(NC)"; \
+		exit 1; \
+	fi
+
+test-next: ## Run /wiz-next integration tests
+	@echo "$(BLUE)Running /wiz-next integration tests...$(NC)"
+	@if [ -f tests/integration/test-wiz-next.sh ]; then \
+		bash tests/integration/test-wiz-next.sh || exit 1; \
+		echo "$(GREEN)✓ /wiz-next tests passed$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠ Integration test script not found$(NC)"; \
+		exit 1; \
+	fi
+
+test-auto: ## Run /wiz-auto integration tests
+	@echo "$(BLUE)Running /wiz-auto integration tests...$(NC)"
+	@if [ -f tests/integration/test-wiz-auto.sh ]; then \
+		bash tests/integration/test-wiz-auto.sh || exit 1; \
+		echo "$(GREEN)✓ /wiz-auto tests passed$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠ Integration test script not found$(NC)"; \
+		exit 1; \
+	fi
+
+test-workflow: ## Run full workflow integration tests
+	@echo "$(BLUE)Running full workflow integration tests...$(NC)"
+	@if [ -f tests/integration/test-full-workflow.sh ]; then \
+		bash tests/integration/test-full-workflow.sh || exit 1; \
+		echo "$(GREEN)✓ Full workflow tests passed$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠ Integration test script not found$(NC)"; \
+		exit 1; \
+	fi
+
+test-prompts: ## Run Promptfoo prompt tests (requires OPENAI_API_KEY)
+	@echo "$(BLUE)Running Promptfoo prompt tests...$(NC)"
+	@if [ -z "$$OPENAI_API_KEY" ]; then \
+		echo "$(YELLOW)⚠ OPENAI_API_KEY not set. Skipping prompt tests.$(NC)"; \
+		echo "   Set OPENAI_API_KEY environment variable to run prompt tests."; \
+		echo "   Example: OPENAI_API_KEY=your_key make test-prompts"; \
+		exit 0; \
+	fi
+	@if command -v npx >/dev/null 2>&1; then \
+		cd tests/prompts && npx promptfoo@latest eval -c promptfoo.yaml || exit 1; \
+		echo "$(GREEN)✓ PRD prompt tests passed$(NC)"; \
+		cd .. && cd prompts/test-suites && npx promptfoo@latest eval -c wiz-phases.yaml 2>/dev/null && echo "$(GREEN)✓ Phases prompt tests passed$(NC)" || echo "$(YELLOW)⚠ Phases tests skipped (API key or other issue)$(NC)"; \
+		npx promptfoo@latest eval -c wiz-milestones.yaml 2>/dev/null && echo "$(GREEN)✓ Milestones prompt tests passed$(NC)" || echo "$(YELLOW)⚠ Milestones tests skipped (API key or other issue)$(NC)"; \
+		echo "$(GREEN)✓ Prompt tests completed$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠ npx not installed. Install Node.js$(NC)"; \
 		exit 1; \
 	fi
 

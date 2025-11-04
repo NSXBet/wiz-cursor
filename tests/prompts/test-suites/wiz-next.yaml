@@ -1,0 +1,27 @@
+# Promptfoo test suite for /wiz-next command
+# Tests milestone execution with context integration and quality gates
+
+description: 'Test /wiz-next command with context integration'
+
+providers:
+  - openai:gpt-4o-mini
+
+tests:
+  # Test 1: Milestone execution with context
+  - vars:
+      command: wiz-next
+      slug: test-next
+      context_files:
+        - tests/fixtures/context/frameworks.md
+    assert:
+      - type: javascript
+        value: |
+          // Should implement according to context
+          return output.includes('FastAPI') || output.includes('implementation');
+      - type: javascript
+        value: |
+          // Should mention quality gates
+          return output.includes('test') || output.includes('lint') || output.includes('commit');
+    options:
+      temperature: 0.3
+
