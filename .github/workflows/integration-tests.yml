@@ -44,6 +44,7 @@ jobs:
         continue-on-error: true
       
       - name: Run Promptfoo tests
+        if: ${{ secrets.OPENAI_API_KEY != '' }}
         run: make test-prompts
         continue-on-error: true
         env:
@@ -54,5 +55,9 @@ jobs:
         run: |
           echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
           echo "- Integration tests completed" >> $GITHUB_STEP_SUMMARY
-          echo "- Promptfoo tests completed" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ secrets.OPENAI_API_KEY }}" ]; then \
+            echo "- Promptfoo tests completed" >> $GITHUB_STEP_SUMMARY; \
+          else \
+            echo "- Promptfoo tests skipped (OPENAI_API_KEY not set)" >> $GITHUB_STEP_SUMMARY; \
+          fi
 
