@@ -93,7 +93,13 @@ lint-markdown: ## Lint markdown files with markdownlint (via npx)
 		exit 1; \
 	fi
 
-test: test-bats test-integration test-prompts ## Run all tests (bats + integration + prompts)
+test: test-bats test-integration ## Run all tests (bats + integration, prompts require OPENAI_API_KEY)
+	@if [ -n "$$OPENAI_API_KEY" ]; then \
+		$(MAKE) test-prompts; \
+	else \
+		echo "$(YELLOW)⚠ OPENAI_API_KEY not set. Skipping prompt tests.$(NC)"; \
+		echo "   Set OPENAI_API_KEY environment variable to run prompt tests."; \
+	fi
 
 test-bats: ## Run bats-core tests
 	@echo "$(BLUE)Running bats-core tests...$(NC)"
