@@ -40,11 +40,11 @@ format-bash: ## Format bash scripts with shfmt
 		exit 1; \
 	fi
 
-format-markdown: ## Format markdown files with mdformat (via uvx)
+format-markdown: ## Format markdown files with mdformat (preserves YAML frontmatter)
 	@echo "$(BLUE)Formatting markdown files...$(NC)"
 	@if command -v uvx >/dev/null 2>&1; then \
-		uvx mdformat $(MARKDOWN_FILES) || exit 1; \
-		echo "$(GREEN)✓ Markdown formatting complete$(NC)"; \
+		uvx --from mdformat --with mdformat-frontmatter mdformat --extensions frontmatter $(MARKDOWN_FILES) || exit 1; \
+		echo "$(GREEN)✓ Markdown formatting complete (frontmatter preserved)$(NC)"; \
 	elif command -v uv >/dev/null 2>&1; then \
 		uv tool run mdformat $(MARKDOWN_FILES) || exit 1; \
 		echo "$(GREEN)✓ Markdown formatting complete$(NC)"; \
