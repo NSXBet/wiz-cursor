@@ -7,10 +7,10 @@ This plan outlines changes to enable Wiz commands and agents to **FIRST** consid
 ## Goals
 
 1. ✅ Commands that plan (`/wiz-prd`, `/wiz-phases`, `/wiz-milestones`) load local context FIRST
-2. ✅ Commands that execute (`/wiz-next`, `/wiz-auto`) load local context FIRST before consulting specialists
-3. ✅ Language specialists explicitly defer to local context when it exists
-4. ✅ `wiz-milestone-analyst` considers local context in analysis
-5. ✅ Local context does NOT interfere with Wiz workflow (file structure, quality gates, etc.)
+1. ✅ Commands that execute (`/wiz-next`, `/wiz-auto`) load local context FIRST before consulting specialists
+1. ✅ Language specialists explicitly defer to local context when it exists
+1. ✅ `wiz-milestone-analyst` considers local context in analysis
+1. ✅ Local context does NOT interfere with Wiz workflow (file structure, quality gates, etc.)
 
 ## Local Context Structure
 
@@ -137,6 +137,7 @@ wiz_load_context_file() {
 ```
 
 **Placement**: Add to "Embedded Utility Functions" section in:
+
 - `.cursor/commands/wiz-prd.md`
 - `.cursor/commands/wiz-phases.md`
 - `.cursor/commands/wiz-milestones.md`
@@ -150,10 +151,11 @@ wiz_load_context_file() {
 **Location**: `.cursor/commands/wiz-prd.md`
 
 **Changes**:
+
 1. Load context metadata BEFORE codebase analysis
-2. Present metadata to AI, let AI decide which files to read
-3. Include loaded context in prompt to `wiz-planner` agent
-4. Make it clear to planner that local context takes precedence
+1. Present metadata to AI, let AI decide which files to read
+1. Include loaded context in prompt to `wiz-planner` agent
+1. Make it clear to planner that local context takes precedence
 
 **Modification Point**: After argument validation, before codebase analysis
 
@@ -168,15 +170,16 @@ fi
 ```
 
 **AI Decision Point**: The AI should:
+
 1. Review the metadata JSON
-2. Identify which context files are relevant:
+1. Identify which context files are relevant:
    - If `applies_to` is empty array → applies to everything (planning, execution, review)
    - If `languages` is empty array → applies to all languages
    - If `applies_to` contains current command type → relevant
    - If `languages` contains detected language → relevant
    - If `tags` or `description` suggest relevance → relevant
-3. Read only relevant files using `wiz_load_context_file()`
-4. Use the loaded context in planning
+1. Read only relevant files using `wiz_load_context_file()`
+1. Use the loaded context in planning
 
 **Prompt Modification**: When delegating to `wiz-planner`, include:
 
@@ -208,9 +211,10 @@ The following local context files are available in `.wiz/context/**/*.md`:
 **Location**: `.cursor/commands/wiz-phases.md`
 
 **Changes**:
+
 1. Load context metadata before reading PRD
-2. Present metadata to AI, let AI decide which files to read
-3. Include loaded context in prompt to `wiz-planner` for phase generation
+1. Present metadata to AI, let AI decide which files to read
+1. Include loaded context in prompt to `wiz-planner` for phase generation
 
 **Modification Point**: After PRD validation, before delegating to planner
 
@@ -229,9 +233,10 @@ fi
 **Location**: `.cursor/commands/wiz-milestones.md`
 
 **Changes**:
+
 1. Load context metadata before reading phases
-2. Present metadata to AI, let AI decide which files to read
-3. Include loaded context in milestone generation
+1. Present metadata to AI, let AI decide which files to read
+1. Include loaded context in milestone generation
 
 **Modification Point**: After phase validation, before milestone generation
 
@@ -250,10 +255,11 @@ fi
 **Location**: `.cursor/commands/wiz-next.md`
 
 **Changes**:
+
 1. Load context metadata BEFORE loading design guidelines
-2. Present metadata to AI, let AI decide which files to read
-3. Include loaded context in execution context
-4. Pass context metadata to specialists when consulting them
+1. Present metadata to AI, let AI decide which files to read
+1. Include loaded context in execution context
+1. Pass context metadata to specialists when consulting them
 
 **Modification Point**: Step 6 - "Load Context" section
 
@@ -288,16 +294,17 @@ fi
 ```
 
 **AI Decision Point**: The AI should:
+
 1. Review the metadata JSON
-2. Identify which context files are relevant:
+1. Identify which context files are relevant:
    - If `applies_to` is empty array → applies to everything (including execution)
    - If `applies_to` contains "execution" → relevant
    - If `languages` is empty array → applies to all languages (relevant)
    - If `languages` matches detected language → relevant
    - If `tags` match milestone topic → relevant
    - If `description` suggests relevance → relevant
-3. Read only relevant files using `wiz_load_context_file()`
-4. Include loaded context in execution
+1. Read only relevant files using `wiz_load_context_file()`
+1. Include loaded context in execution
 
 **Specialist Consultation Modification**: When consulting specialists, include:
 
@@ -358,6 +365,7 @@ MILESTONE_SECTION=$(awk "/^### ${MILESTONE_ID}:/,/^---$|^### [A-Z0-9]+:/" "$NEXT
 ### Phase 4: Modify Language Specialists
 
 **Files to Update**:
+
 - `.cursor/agents/wiz-go-specialist.md`
 - `.cursor/agents/wiz-typescript-specialist.md`
 - `.cursor/agents/wiz-python-specialist.md`
@@ -367,7 +375,7 @@ MILESTONE_SECTION=$(awk "/^### ${MILESTONE_ID}:/,/^---$|^### [A-Z0-9]+:/" "$NEXT
 
 **Changes**: Add new section at the top (after role description):
 
-```markdown
+````markdown
 ## ⚠️ CRITICAL: Local Context Precedence
 
 **YOU MUST DEFER TO LOCAL CONTEXT WHEN PROVIDED.**
@@ -398,12 +406,14 @@ I reviewed available local context and found `frameworks.md` specifies using [X 
 ## Rationale
 
 [Why local context's approach fits, or acknowledge if you'd normally recommend something else]
-```
+````
 
 **When NO local context is provided or no relevant files exist:**
+
 - Provide your expert recommendations as usual
 - Reference your preferred technology stack (as documented in your agent file)
-```
+
+````
 
 **Placement**: Add this section right after "## Your Role: Advisory & Consultative" and before "## Tools Available"
 
@@ -444,7 +454,7 @@ I reviewed available local context and found `frameworks.md` specifies using [X 
 - Note when recommendations align with local context
 - Acknowledge when deviating from general best practices due to local context
 - Only read context files that are relevant to avoid unnecessary token usage
-```
+````
 
 ### Phase 6: Modify wiz-milestone-analyst Agent
 
@@ -488,13 +498,14 @@ I reviewed available local context and found `frameworks.md` specifies using [X 
 ### Phase 7: Update Documentation
 
 **Files to Update**:
+
 - `README.md` - Add section about local context
 - `docs/commands.md` - Document local context loading
 - `docs/agents.md` - Document local context precedence
 
 **New Section in README.md** (after "## Best Practices"):
 
-```markdown
+````markdown
 ## Local Context Support
 
 Wiz respects user-provided local context for project-specific guidance. Context files use frontmatter metadata to enable intelligent, selective loading.
@@ -529,7 +540,7 @@ applies_to: [planning, execution]
 - **Testing**: pytest with pytest-asyncio
 - **HTTP Client**: httpx (not requests)
 - **Background Jobs**: Celery with Redis
-```
+````
 
 **Example `.wiz/context/technologies.md`:**
 
@@ -552,16 +563,17 @@ applies_to: [planning, execution]
 ### How Local Context Works
 
 1. **Metadata Loading**: Commands load frontmatter metadata from all context files
-2. **Intelligent Selection**: AI reviews metadata and decides which files are relevant
-3. **Selective Reading**: Only relevant context files are fully loaded (saves tokens)
-4. **Highest Priority**: Local context takes precedence over all specialist recommendations
-5. **Planning**: `/wiz-prd`, `/wiz-phases`, `/wiz-milestones` check metadata and load relevant context
-6. **Execution**: `/wiz-next` and `/wiz-auto` check metadata and load relevant context before consulting specialists
-7. **Specialists**: Language specialists check metadata and read relevant files before providing recommendations
+1. **Intelligent Selection**: AI reviews metadata and decides which files are relevant
+1. **Selective Reading**: Only relevant context files are fully loaded (saves tokens)
+1. **Highest Priority**: Local context takes precedence over all specialist recommendations
+1. **Planning**: `/wiz-prd`, `/wiz-phases`, `/wiz-milestones` check metadata and load relevant context
+1. **Execution**: `/wiz-next` and `/wiz-auto` check metadata and load relevant context before consulting specialists
+1. **Specialists**: Language specialists check metadata and read relevant files before providing recommendations
 
 ### Local Context Examples
 
 **`.wiz/context/go/patterns.md`:**
+
 ```markdown
 ---
 description: Go-specific patterns and conventions for this project
@@ -578,6 +590,7 @@ applies_to: [execution]
 ```
 
 **`.wiz/context/architecture.md`:**
+
 ```markdown
 ---
 description: High-level architectural decisions and patterns
@@ -591,6 +604,7 @@ applies_to: [planning]
 - Database per service pattern
 - Event-driven architecture with Kafka
 ```
+
 ```
 
 ## Implementation Checklist
@@ -679,3 +693,4 @@ This plan ensures that:
 
 The implementation is backward compatible - if no local context exists, everything works as before.
 
+```

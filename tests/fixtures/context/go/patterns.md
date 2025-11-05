@@ -1,9 +1,6 @@
----
-description: Go-specific patterns and best practices
-tags: [patterns, go, golang]
-languages: [go]
-applies_to: [planning, execution]
----
+______________________________________________________________________
+
+## description: Go-specific patterns and best practices tags: [patterns, go, golang] languages: [go] applies_to: [planning, execution]
 
 # Go Patterns
 
@@ -44,8 +41,8 @@ func TestFunction(t *testing.T) {
 ## Project Structure
 
 Follow standard Go project layout:
+
 - `cmd/` - Application entrypoints
 - `internal/` - Private application code
 - `pkg/` - Public library code
 - `test/` - Test data and fixtures
-

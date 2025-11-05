@@ -563,3 +563,5 @@ Detailed report: .wiz/validation-report.md
 - Integrates with quality gate skills (Phase 4)
 
 
+
+

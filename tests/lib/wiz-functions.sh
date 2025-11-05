@@ -8,71 +8,55 @@ wiz_load_context_metadata() {
     local metadata_json="[]"
     
     if [[ ! -d "$context_dir" ]]; then
-        echo "$metadata_json"
+        echo "[]"
         return 0
     fi
     
-    local temp_file
-    temp_file=$(mktemp)
-    
-    # Find all markdown files in context directory (including subdirectories)
+    # Find all .md files and extract frontmatter
     while IFS= read -r -d '' file; do
-        # Get relative path from context_dir
-        local rel_path="${file#$context_dir/}"
-        
-        # Extract frontmatter
-        if [[ -f "$file" ]]; then
-            # Check if file has frontmatter
-            if head -n 1 "$file" | grep -q "^---"; then
-                # Extract frontmatter block
-                local frontmatter=""
-                local in_frontmatter=false
-                local line_num=0
+        if [[ -f "$file" ]] && [[ -r "$file" ]]; then
+            local rel_path="${file#$context_dir/}"
+            
+            # Extract frontmatter (between --- and ---)
+            local frontmatter=$(awk '/^---$/{count++; if(count==1) next; if(count==2) exit} {if(count==1) print}' "$file" 2>/dev/null)
+            
+            if [[ -n "$frontmatter" ]]; then
+                # Parse frontmatter into JSON
+                local description=$(echo "$frontmatter" | grep -E "^description:" | sed 's/^description:[[:space:]]*//' | sed 's/^"//;s/"$//' || echo "")
                 
-                while IFS= read -r line; do
-                    ((line_num++))
-                    if [[ $line_num -eq 1 ]] && [[ "$line" == "---" ]]; then
-                        in_frontmatter=true
-                        continue
-                    fi
-                    
-                    if [[ $in_frontmatter == true ]]; then
-                        if [[ "$line" == "---" ]]; then
-                            break
-                        fi
-                        frontmatter+="$line"$'\n'
-                    fi
-                done < "$file"
+                # Parse tags (optional)
+                local tags=$(echo "$frontmatter" | grep -E "^tags:" | sed 's/^tags:[[:space:]]*//' | sed "s/^\[//;s/\]$//" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^"//;s/"$//' | jq -R . 2>/dev/null | jq -s . 2>/dev/null || echo "[]")
                 
-                # Parse YAML to JSON (basic parsing)
-                if [[ -n "$frontmatter" ]]; then
-                    # Convert YAML-like structure to JSON (simplified)
-                    local description=""
-                    local tags="[]"
-                    local languages="[]"
-                    local applies_to="[]"
+                # Parse languages (optional, empty means applies to all)
+                local languages=$(echo "$frontmatter" | grep -E "^languages:" | sed 's/^languages:[[:space:]]*//' | sed "s/^\[//;s/\]$//" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^"//;s/"$//' | jq -R . 2>/dev/null | jq -s . 2>/dev/null || echo "[]")
+                
+                # Parse applies_to (optional, empty means applies to everything)
+                local applies_to=$(echo "$frontmatter" | grep -E "^applies_to:" | sed 's/^applies_to:[[:space:]]*//' | sed "s/^\[//;s/\]$//" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^"//;s/"$//' | jq -R . 2>/dev/null | jq -s . 2>/dev/null || echo "[]")
+                
+                # Build JSON entry (only if description exists)
+                if [[ -n "$description" ]]; then
+                    local entry=$(jq -n \
+                        --arg path "$rel_path" \
+                        --arg desc "$description" \
+                        --argjson tags "$tags" \
+                        --argjson langs "$languages" \
+                        --argjson applies "$applies_to" \
+                        '{
+                            path: $path,
+                            description: $desc,
+                            tags: $tags,
+                            languages: $langs,
+                            applies_to: $applies
+                        }' 2>/dev/null)
                     
-                    # Extract description
-                    if echo "$frontmatter" | grep -q "description:"; then
-                        description=$(echo "$frontmatter" | grep "description:" | sed 's/description:[[:space:]]*//' | sed 's/^"//' | sed 's/"$//')
-                    fi
-                    
-                    # Build JSON object
-                    local json_obj="{\"path\":\"$rel_path\",\"description\":\"$description\",\"tags\":$tags,\"languages\":$languages,\"applies_to\":$applies_to}"
-                    
-                    # Add to array (simplified - would need proper JSON merging)
-                    if [[ "$metadata_json" == "[]" ]]; then
-                        metadata_json="[$json_obj]"
-                    else
-                        metadata_json="${metadata_json%,}]"
-                        metadata_json="$metadata_json,$json_obj]"
+                    if [[ -n "$entry" ]]; then
+                        metadata_json=$(echo "$metadata_json" | jq --argjson entry "$entry" '. += [$entry]' 2>/dev/null || echo "$metadata_json")
                     fi
                 fi
             fi
         fi
     done < <(find "$context_dir" -name "*.md" -type f -print0 2>/dev/null)
     
-    rm -f "$temp_file"
     echo "$metadata_json"
 }
 

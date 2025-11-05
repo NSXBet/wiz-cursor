@@ -33,4 +33,3 @@ applies_to: [planning, execution]
 - JSON support
 - Full-text search
 - Extensions ecosystem
-

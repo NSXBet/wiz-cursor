@@ -8,22 +8,20 @@
 
 Turn brilliant ideas into shipped code with AI-powered planning, execution, and quality gates.
 
-[![Status](https://img.shields.io/badge/status-alpha--ready-yellow)]()
-[![Tests](https://img.shields.io/badge/tests-93.8%25%20passing-brightgreen)]()
-[![Documentation](https://img.shields.io/badge/docs-comprehensive-blue)]()
-[![License](https://img.shields.io/badge/license-MIT-green)]()
-
-[Quick Start](#-quick-start) • [Documentation](#-documentation) • [Installation](#-installation) • [Contributing](#-contributing)
+[![Status](https://img.shields.io/badge/status-alpha--ready-yellow)](https://github.com/NSXBet/wiz-cursor)
+[![Tests](https://img.shields.io/badge/tests-93.8%25%20passing-brightgreen)](https://github.com/NSXBet/wiz-cursor/actions/workflows/test.ym
+[![Documentation](https://img.shields.io/badge/docs-comprehensive-blue)](https://github.com/NSXBet/wiz-cursor)
+[![License](https://img.shields.io/badge/license-MIT-green)](<https://github.com/NSXBet/wiz-cursor/blob/main/LICENSE.md>)
 
 </div>
 
----
+______________________________________________________________________
 
 > **🐛 Found a bug?** [Report it here](https://github.com/NSXBet/wiz-cursor/issues/new/choose) - we have quick 2-minute templates!
 >
 > **💬 Have questions?** Check [Discussions](https://github.com/NSXBet/wiz-cursor/discussions) or ask in the community.
 
----
+______________________________________________________________________
 
 ## ✨ Why Wiz?
 
@@ -40,7 +38,7 @@ Stop wondering "where do I even start?" - Wiz transforms vague ideas into shippe
 
 **Think of it as a senior engineer who never gets tired, always follows best practices, and actually enjoys documentation!** 🚀
 
----
+______________________________________________________________________
 
 ## Installing
 
@@ -478,9 +476,11 @@ Wiz respects user-provided local context for project-specific guidance. Context 
 Create markdown files in `.wiz/context/**/*.md` with YAML frontmatter. Each file MUST include a `description` field, and can optionally include tags, languages, and applies_to fields.
 
 **Required Frontmatter:**
+
 - `description`: Brief description of what this context covers
 
 **Optional Frontmatter:**
+
 - `tags`: Array of tags (e.g., `[frameworks, architecture, patterns]`)
 - `languages`: Array of languages this applies to (e.g., `[go, typescript]`)
   - If omitted, applies to all languages
@@ -526,16 +526,17 @@ applies_to: [planning, execution]
 ### How Local Context Works
 
 1. **Metadata Loading**: Commands load frontmatter metadata from all context files
-2. **Intelligent Selection**: AI reviews metadata and decides which files are relevant
-3. **Selective Reading**: Only relevant context files are fully loaded (saves tokens)
-4. **Highest Priority**: Local context takes precedence over all specialist recommendations
-5. **Planning**: `/wiz-prd`, `/wiz-phases`, `/wiz-milestones` check metadata and load relevant context
-6. **Execution**: `/wiz-next` and `/wiz-auto` check metadata and load relevant context before consulting specialists
-7. **Specialists**: Language specialists check metadata and read relevant files before providing recommendations
+1. **Intelligent Selection**: AI reviews metadata and decides which files are relevant
+1. **Selective Reading**: Only relevant context files are fully loaded (saves tokens)
+1. **Highest Priority**: Local context takes precedence over all specialist recommendations
+1. **Planning**: `/wiz-prd`, `/wiz-phases`, `/wiz-milestones` check metadata and load relevant context
+1. **Execution**: `/wiz-next` and `/wiz-auto` check metadata and load relevant context before consulting specialists
+1. **Specialists**: Language specialists check metadata and read relevant files before providing recommendations
 
 ### Local Context Examples
 
 **`.wiz/context/go/patterns.md`:**
+
 ```markdown
 ---
 description: Go-specific patterns and conventions for this project
@@ -552,6 +553,7 @@ applies_to: [execution]
 ```
 
 **`.wiz/context/architecture.md`:**
+
 ```markdown
 ---
 description: High-level architectural decisions and patterns

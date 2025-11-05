@@ -166,11 +166,12 @@ Language specialists provide expertise for specific programming languages and fr
 **⚠️ CRITICAL: Local Context Precedence**
 
 All language specialists **MUST defer to local context** when provided:
+
 1. **Review metadata FIRST** to identify relevant context files
-2. **Read relevant files** using `wiz_load_context_file()` if they apply
-3. **If local context addresses the topic** → Use that guidance, acknowledge it explicitly
-4. **If local context conflicts with recommendations** → Explicitly defer to local context
-5. **If no relevant local context** → Provide expert recommendation as usual
+1. **Read relevant files** using `wiz_load_context_file()` if they apply
+1. **If local context addresses the topic** → Use that guidance, acknowledge it explicitly
+1. **If local context conflicts with recommendations** → Explicitly defer to local context
+1. **If no relevant local context** → Provide expert recommendation as usual
 
 **Priority**: Local context > Specialist recommendations > General best practices
 
@@ -451,6 +452,7 @@ I reviewed available local context and found `frameworks.md` specifies using
 ### Context File Relevance
 
 Agents determine relevance based on:
+
 - **Empty arrays**: If `languages` or `applies_to` is empty, applies to everything
 - **Language matching**: If `languages` includes detected/relevant language
 - **Tag matching**: If `tags` match the topic (e.g., "frameworks", "patterns")

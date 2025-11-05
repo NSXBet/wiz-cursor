@@ -628,13 +628,14 @@ All planning and execution commands support **local context** from `.wiz/context
 ### How It Works
 
 1. **Metadata Loading**: Commands call `wiz_load_context_metadata()` which extracts frontmatter from all context files
-2. **Intelligent Selection**: AI reviews metadata (description, tags, languages, applies_to) and selects relevant files
-3. **Selective Reading**: Only relevant files are fully loaded using `wiz_load_context_file()` to save tokens
-4. **Precedence**: Local context takes **absolute precedence** over specialist recommendations and research
+1. **Intelligent Selection**: AI reviews metadata (description, tags, languages, applies_to) and selects relevant files
+1. **Selective Reading**: Only relevant files are fully loaded using `wiz_load_context_file()` to save tokens
+1. **Precedence**: Local context takes **absolute precedence** over specialist recommendations and research
 
 ### Context File Format
 
 Context files use YAML frontmatter with:
+
 - `description` (required): Brief description
 - `tags` (optional): Array of tags for categorization
 - `languages` (optional): Array of languages (empty = all languages)
@@ -653,6 +654,7 @@ Context files use YAML frontmatter with:
 ### Example Context Usage
 
 If `.wiz/context/frameworks.md` specifies "Use FastAPI":
+
 - `/wiz-prd` won't ask about framework choice → assumes FastAPI
 - `/wiz-phases` plans phases with FastAPI in mind
 - `/wiz-next` and language specialists recommend FastAPI patterns

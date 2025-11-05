@@ -3,6 +3,7 @@
 ## ✅ Completed
 
 ### Phase 1: Framework Setup
+
 - [x] Test directory structure created
 - [x] Promptfoo base configuration (`tests/prompts/promptfoo.yaml`)
 - [x] Test fixtures created:
@@ -11,6 +12,7 @@
   - Workflow fixtures (`tests/fixtures/workflows/`)
 
 ### Phase 2: Test Suites Created
+
 - [x] Promptfoo test suites for all 5 commands:
   - `wiz-prd.yaml` - PRD generation tests
   - `wiz-phases.yaml` - Phase generation tests
@@ -19,6 +21,7 @@
   - `wiz-auto.yaml` - Automated execution tests
 
 ### Phase 3: Integration Scripts
+
 - [x] Bash integration test scripts for all commands:
   - `test-wiz-prd.sh` - PRD integration tests
   - `test-wiz-phases.sh` - Phase integration tests
@@ -28,7 +31,9 @@
   - `test-full-workflow.sh` - Full workflow tests
 
 ### Phase 4: Infrastructure
+
 - [x] Makefile targets added:
+
   - `make test-integration` - Run all integration tests
   - `make test-prd` - Test /wiz-prd
   - `make test-phases` - Test /wiz-phases
@@ -39,27 +44,33 @@
   - `make test-prompts` - Run Promptfoo tests
 
 - [x] Test helper library (`tests/lib/test-helpers.sh`)
+
 - [x] CI/CD workflow (`.github/workflows/integration-tests.yml`)
+
 - [x] Documentation (`tests/README.md`)
 
 ## 📋 Test Coverage
 
 ### Planning Commands
+
 - ✅ `/wiz-prd` - PRD generation with context integration
 - ✅ `/wiz-phases` - Phase generation with PRD input
 - ✅ `/wiz-milestones` - Milestone generation with phases
 
 ### Execution Commands
+
 - ✅ `/wiz-next` - Milestone execution with quality gates
 - ✅ `/wiz-auto` - Automated milestone execution loop
 
 ### Full Workflow
+
 - ✅ Complete workflow (PRD → Phases → Milestones → Execution)
 - ✅ Context precedence validation
 
 ## 🎯 Test Scenarios Covered
 
 ### Context Integration
+
 - Empty context directory
 - Single context file with framework specification
 - Multiple context files with different scopes
@@ -67,6 +78,7 @@
 - Nested context files (language-specific)
 
 ### Output Validation
+
 - PRD structure (overview, requirements, architecture)
 - Phase structure (goals, dependencies, acceptance criteria)
 - Milestone structure (P##M## format, acceptance criteria)
@@ -113,11 +125,13 @@ tests/
 ## 🚀 Usage
 
 ### Run All Tests
+
 ```bash
 make test-integration
 ```
 
 ### Run Specific Command Tests
+
 ```bash
 make test-prd
 make test-phases
@@ -128,6 +142,7 @@ make test-workflow
 ```
 
 ### Run Promptfoo Tests
+
 ```bash
 make test-prompts
 ```
@@ -135,16 +150,18 @@ make test-prompts
 ## 📝 Notes
 
 ### Current Limitations
+
 - Integration tests set up test structure but don't execute actual commands (requires Cursor IDE environment)
 - Promptfoo tests validate prompt/LLM interactions but need API keys configured
 - Actual command execution tests require the Cursor IDE environment
 
 ### Next Steps
+
 1. Configure Promptfoo with API keys for actual LLM testing
-2. Enhance integration scripts to actually execute commands when Cursor environment is available
-3. Add more test fixtures for edge cases
-4. Expand test coverage for context precedence scenarios
-5. Add performance/benchmark tests
+1. Enhance integration scripts to actually execute commands when Cursor environment is available
+1. Add more test fixtures for edge cases
+1. Expand test coverage for context precedence scenarios
+1. Add performance/benchmark tests
 
 ## 🔧 Requirements
 
@@ -157,4 +174,3 @@ make test-prompts
 
 - [Tests README](README.md) - Test documentation
 - [Testing Plan](../../TESTING_PLAN.md) - Overall testing strategy
-

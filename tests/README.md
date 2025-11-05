@@ -21,11 +21,13 @@ tests/
 ### Integration Tests (Bash Scripts)
 
 Run all integration tests:
+
 ```bash
 make test-integration
 ```
 
 Run specific command tests:
+
 ```bash
 make test-prd          # Test /wiz-prd
 make test-phases        # Test /wiz-phases
@@ -36,6 +38,7 @@ make test-workflow      # Test full workflow
 ```
 
 Run individual test scripts:
+
 ```bash
 bash tests/integration/test-wiz-prd.sh
 bash tests/integration/test-wiz-phases.sh
@@ -45,17 +48,20 @@ bash tests/integration/test-wiz-phases.sh
 ### Promptfoo Tests
 
 Run Promptfoo prompt tests:
+
 ```bash
 make test-prompts
 ```
 
 Or run manually:
+
 ```bash
 cd tests/prompts
 npx promptfoo@latest eval
 ```
 
 Run specific test suite:
+
 ```bash
 cd tests/prompts
 npx promptfoo@latest eval test-suites/wiz-prd.yaml
@@ -89,13 +95,14 @@ Sample workflow artifacts in `fixtures/workflows/` (to be created):
 ### Adding Integration Tests
 
 1. Create a new test script in `tests/integration/`
-2. Follow the pattern from existing scripts:
+1. Follow the pattern from existing scripts:
    - Set up test environment
    - Execute command (or simulate)
    - Verify outputs
    - Clean up
 
 Example:
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -112,12 +119,13 @@ test_my_command() {
 ### Adding Promptfoo Tests
 
 1. Create a new test suite YAML file in `tests/prompts/test-suites/`
-2. Define test cases with:
+1. Define test cases with:
    - `vars` - Variables for the test
    - `assert` - Assertions to verify
    - `options` - LLM options
 
 Example:
+
 ```yaml
 tests:
   - vars:
@@ -154,4 +162,3 @@ Tests can be run in CI/CD pipelines. See `.github/workflows/` for GitHub Actions
 - Integration tests currently set up the test structure but don't execute actual commands (requires Cursor environment)
 - Promptfoo tests validate prompt/LLM interactions
 - Actual command execution tests require the Cursor IDE environment
-

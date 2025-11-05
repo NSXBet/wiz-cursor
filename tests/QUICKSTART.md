@@ -3,6 +3,7 @@
 ## Overview
 
 This testing infrastructure provides integration tests for Wiz's core commands using:
+
 - **Promptfoo** - For testing prompt/LLM interactions
 - **Bash scripts** - For integration testing command execution
 
@@ -15,6 +16,7 @@ make test-integration
 ```
 
 This runs all integration tests for:
+
 - `/wiz-prd`
 - `/wiz-phases`
 - `/wiz-milestones`
@@ -46,6 +48,7 @@ make test-prompts
 ### Integration Tests (`tests/integration/`)
 
 Bash scripts that:
+
 - Set up test environment
 - Verify command outputs
 - Test context integration
@@ -56,6 +59,7 @@ Bash scripts that:
 ### Promptfoo Tests (`tests/prompts/test-suites/`)
 
 YAML configuration files that:
+
 - Test prompt effectiveness
 - Validate LLM outputs
 - Compare model responses
@@ -68,18 +72,21 @@ YAML configuration files that:
 ### Context Files (`tests/fixtures/context/`)
 
 Sample context files for testing:
+
 - `frameworks.md` - Framework specifications
 - `go/patterns.md` - Go-specific patterns
 
 ### Workflow Fixtures (`tests/fixtures/workflows/`)
 
 Sample workflow artifacts:
+
 - `test-prd.md` - Example PRD
 - `test-phases/` - Example phase files
 
 ### Codebase Fixtures (`tests/fixtures/codebases/`)
 
 Minimal test repositories:
+
 - `go-project/` - Simple Go project
 
 ## Writing New Tests
@@ -87,6 +94,7 @@ Minimal test repositories:
 ### Adding an Integration Test
 
 1. Create script in `tests/integration/`:
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -112,14 +120,16 @@ main "$@"
 ```
 
 2. Add Makefile target in `Makefile`:
+
 ```makefile
 test-my-command: ## Run my-command tests
-	@bash tests/integration/test-my-command.sh
+ . @bash tests/integration/test-my-command.sh
 ```
 
 ### Adding a Promptfoo Test
 
 1. Create YAML file in `tests/prompts/test-suites/`:
+
 ```yaml
 description: 'Test my command'
 
@@ -136,6 +146,7 @@ tests:
 ```
 
 2. Add to `tests/prompts/promptfoo.yaml` or run directly:
+
 ```bash
 cd tests/prompts
 npx promptfoo@latest eval test-suites/my-command.yaml
@@ -153,6 +164,7 @@ npx promptfoo@latest eval test-suites/my-command.yaml
 Tests run automatically in GitHub Actions (`.github/workflows/integration-tests.yml`).
 
 To run locally:
+
 ```bash
 # Run all tests
 make test-integration
@@ -183,13 +195,12 @@ make test-prd
 ## Next Steps
 
 1. **Configure API Keys**: Set up OpenAI API key for Promptfoo tests
-2. **Run Tests**: Execute `make test-integration` to verify everything works
-3. **Add More Tests**: Expand test coverage as needed
-4. **Review Results**: Check test outputs and improve as necessary
+1. **Run Tests**: Execute `make test-integration` to verify everything works
+1. **Add More Tests**: Expand test coverage as needed
+1. **Review Results**: Check test outputs and improve as necessary
 
 ## Documentation
 
 - [Full Test Documentation](README.md)
 - [Implementation Status](IMPLEMENTATION_STATUS.md)
 - [Testing Plan](../../TESTING_PLAN.md)
-
