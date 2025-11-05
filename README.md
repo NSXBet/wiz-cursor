@@ -9,9 +9,9 @@
 Turn brilliant ideas into shipped code with AI-powered planning, execution, and quality gates.
 
 [![Status](https://img.shields.io/badge/status-alpha--ready-yellow)](https://github.com/NSXBet/wiz-cursor)
-[![Tests](https://img.shields.io/badge/tests-93.8%25%20passing-brightgreen)](https://github.com/NSXBet/wiz-cursor/actions/workflows/test.ym
+[![Tests](https://img.shields.io/badge/tests-93.8%25%20passing-brightgreen)](https://github.com/NSXBet/wiz-cursor)
 [![Documentation](https://img.shields.io/badge/docs-comprehensive-blue)](https://github.com/NSXBet/wiz-cursor)
-[![License](https://img.shields.io/badge/license-MIT-green)](<https://github.com/NSXBet/wiz-cursor/blob/main/LICENSE.md>)
+[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/NSXBet/wiz-cursor/blob/main/LICENSE.md)
 
 </div>
 

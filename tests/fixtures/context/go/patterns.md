@@ -1,4 +1,9 @@
-______________________________________________________________________
+---
+description: Go-specific patterns and best practices
+tags: [patterns, go, golang]
+languages: [go]
+applies_to: [planning, execution]
+---
 
 ## description: Go-specific patterns and best practices tags: [patterns, go, golang] languages: [go] applies_to: [planning, execution]
 
