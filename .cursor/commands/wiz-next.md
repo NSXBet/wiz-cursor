@@ -33,6 +33,7 @@ This allows users to batch-complete easy milestones (e.g., `/wiz-next 4` for the
 - PRD must exist at `.wiz/<slug>/prd.md`
 - Phases must exist with milestones in `.wiz/<slug>/phases/`
 - At least one milestone with status `🚧 TODO`
+- **MANDATORY**: A pre-commit hook script must exist at `scripts/pre-commit.sh` that runs linters and tests. This script will be executed automatically by git hooks before every commit.
 
 ## ⚠️ CRITICAL: About Bash Code Blocks in This Command
 
@@ -1111,6 +1112,12 @@ mypy .                    # Type check
 
 **CRITICAL**: Fix any failures before proceeding. If tests or linters fail and you're unsure how to fix them, consult the language specialist for guidance (see Step 8.3).
 
+**🚨 LINT ERROR POLICY 🚨**:
+- **ALWAYS fix lint errors** - Do NOT add lint ignores (e.g., `// eslint-disable`, `# noqa`, `# pylint: disable`) unless it is genuinely not feasible to fix the error
+- If you encounter a lint error, first attempt to fix it properly
+- Only add lint ignores as a last resort when fixing would require significant architectural changes or when the lint rule is incorrect for the specific use case
+- When adding a lint ignore, include a comment explaining why it's necessary
+
 ## Critical Quality Standards
 
 **IMPORTANT: we WILL NOT tolerate any failing or skipped tests and we won't allow any LINT ERRORS. The entire codebase is your responsibility, not just the last milestone updates. This means that if something is broken WE FIX IT!**
@@ -1388,6 +1395,12 @@ After ALL specialists respond, aggregate their reviews:
 
 ### Step 11: Create Narrative Commit
 
+**🚨 ABSOLUTE PROHIBITION 🚨**:
+- **NEVER use `git commit --no-verify`** - This is COMPLETELY FORBIDDEN
+- The pre-commit hook at `scripts/pre-commit.sh` MUST run before every commit
+- If the pre-commit hook fails, you MUST fix the issues (tests, linters) before committing
+- Skipping hooks defeats the purpose of quality gates and is strictly prohibited
+
 After specialist approval, create a commit with full narrative structure:
 
 ```bash
@@ -1401,6 +1414,10 @@ Completed milestone ${MILESTONE_ID}.
 
 Co-Authored-By: Wiz <wiz@flutterbrazil.com>"
 
+# IMPORTANT:
+# - YES to --no-gpg-sign (avoid GPG signing issues)
+# - NO to --no-verify (let hooks run for quality checks - THIS IS MANDATORY)
+# - The pre-commit hook at scripts/pre-commit.sh will run automatically
 git commit --no-gpg-sign -m "$COMMIT_MSG"
 
 COMMIT_HASH=$(git rev-parse --short HEAD)

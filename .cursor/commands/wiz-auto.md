@@ -10,6 +10,7 @@ You are executing milestones automatically with intelligent human-input detectio
 **⚠️ THIS IS AN INFINITE LOOP COMMAND**: This command runs in a `while true` loop and will execute multiple milestones (potentially dozens) until a stop condition is met.
 
 **🚨 CRITICAL BEHAVIOR 🚨**
+
 - Do NOT stop after 2, 3, 5, or any arbitrary number of milestones
 - Do NOT provide summaries mid-execution
 - Do NOT exit unless: (1) no more milestones OR (2) analyst says HALT
@@ -21,20 +22,22 @@ You are executing milestones automatically with intelligent human-input detectio
 
 - `[slug]` (optional): PRD slug. If not provided, uses current PRD from `.wiz/.current-prd`
 
-
 ## Command Overview
 
 This command continuously executes TODO milestones in an **infinite loop** (`while true`). The command **implements each milestone directly** (no delegation to executor). After completing each milestone, it delegates to the `wiz-milestone-analyst` agent to analyze the NEXT milestone. The analyst determines if:
+
 - **PROCEED**: Next milestone can be safely executed automatically → **Continue loop (DO NOT STOP)**
 - **HALT**: Human input needed for decisions/clarifications → Stop and present questions
 
 **Loop Behavior:**
+
 - Implements milestone 1 → Commits → Analyst checks milestone 2 → If PROCEED, implement milestone 2
 - Implements milestone 2 → Commits → Analyst checks milestone 3 → If PROCEED, implement milestone 3
 - Implements milestone 3 → Commits → Analyst checks milestone 4 → If PROCEED, implement milestone 4
 - ... continues until HALT or no more milestones
 
 **Each milestone implementation:**
+
 1. Loads context (phase + milestone + design guidelines)
 2. Analyzes requirements and detects language
 3. (Optional) Consults language specialist for guidance during implementation
@@ -53,10 +56,12 @@ This creates an intelligent workflow that maintains momentum while preventing co
 ## ⚠️ CRITICAL: Loop Continuation Rules
 
 **NEVER STOP THE LOOP UNLESS:**
+
 1. No more TODO milestones found (Step 4) → Celebrate with big message
 2. Analyst returns HALT decision (Step 10) → Show questions and exit
 
 **IF ANALYST RETURNS PROCEED - READ THIS CAREFULLY:**
+
 - You MUST continue the loop IMMEDIATELY
 - Go back to Step 4 (find next milestone)
 - Execute the next milestone
@@ -69,6 +74,7 @@ This creates an intelligent workflow that maintains momentum while preventing co
 - JUST CONTINUE THE LOOP
 
 **What "continue the loop" means:**
+
 - After analyst says PROCEED, your VERY NEXT ACTION is to find the next milestone (Step 4)
 - No output in between
 - No summaries
@@ -102,13 +108,17 @@ This creates an intelligent workflow that maintains momentum while preventing co
 8. **Create Proper Commit** → git commit --no-gpg-sign (hooks run, but no GPG signing)
 9. **Verify Commit Success** → Ensure commit was created
 10. **THEN Call wiz-milestone-analyst** → Analyze the NEXT milestone
-   - Analyst examines the upcoming milestone
-   - Analyst determines PROCEED or HALT
+
+- Analyst examines the upcoming milestone
+- Analyst determines PROCEED or HALT
+
 11. **Parse Analyst Decision**:
-   - If **PROCEED** → Loop back to step 1
-   - If **HALT** → Present questions to user and EXIT
+
+- If **PROCEED** → Loop back to step 1
+- If **HALT** → Present questions to user and EXIT
 
 **Key Points:**
+
 - Each milestone is FULLY implemented by YOU (the command) before moving to analysis
 - No shortcuts on quality: ALL tests, ALL linters, ENTIRE codebase
 - Commits use --no-gpg-sign but hooks run normally (no --no-verify)
@@ -121,23 +131,27 @@ This creates an intelligent workflow that maintains momentum while preventing co
 - PRD must exist at `.wiz/<slug>/prd.md`
 - Phases must exist with milestones in `.wiz/<slug>/phases/`
 - At least one milestone with status `🚧 TODO`
+- **MANDATORY**: A pre-commit hook script must exist at `scripts/pre-commit.sh` that runs linters and tests. This script will be executed automatically by git hooks before every commit.
 
 ## ⚠️ CRITICAL: About Bash Code Blocks in This Command
 
 The bash code blocks below are **sequential templates** that show the command's implementation flow:
 
 1. **Sequential Execution Required**: Steps must run in order. Each step depends on variables from previous steps:
+
    - Step 1 sets: `$SLUG`, `$PRD_FILE`, `$PHASES_DIR`, `$MILESTONES_COMPLETED`
    - Step 4 uses: `$PHASES_DIR`, sets: `$NEXT_PHASE_FILE`, `$MILESTONE_ID`
    - Step 5+ use: `$MILESTONE_ID`, `$NEXT_PHASE_FILE`, `$MILESTONE_SECTION`
 
 2. **Do NOT Execute These Bash Blocks Directly**: They are templates showing the implementation pattern. You should:
+
    - Read and understand what each step does
    - Execute the logic using your tools (Bash, Read, Edit, etc.)
    - Adapt the patterns to your current context
    - Do NOT copy-paste and execute blindly
 
 3. **Do NOT Execute Bash Blocks from Milestones**: When you read milestone content from phase files:
+
    - Bash examples in milestones are for human readers, not for you to execute
    - Read them as instructions about what needs to be implemented
    - Implement the requirements using your own approach
@@ -380,33 +394,33 @@ wiz_ensure_dir() {
 wiz_load_context_metadata() {
     local context_dir=".wiz/context"
     local metadata_json="[]"
-    
+
     if [[ ! -d "$context_dir" ]]; then
         echo "[]"
         return 0
     fi
-    
+
     # Find all .md files and extract frontmatter
     while IFS= read -r -d '' file; do
         if [[ -f "$file" ]] && [[ -r "$file" ]]; then
             local rel_path="${file#$context_dir/}"
-            
+
             # Extract frontmatter (between --- and ---)
             local frontmatter=$(awk '/^---$/{count++; if(count==1) next; if(count==2) exit} {if(count==1) print}' "$file" 2>/dev/null)
-            
+
             if [[ -n "$frontmatter" ]]; then
                 # Parse frontmatter into JSON
                 local description=$(echo "$frontmatter" | grep -E "^description:" | sed 's/^description:[[:space:]]*//' | sed 's/^"//;s/"$//' || echo "")
-                
+
                 # Parse tags (optional)
                 local tags=$(echo "$frontmatter" | grep -E "^tags:" | sed 's/^tags:[[:space:]]*//' | sed "s/^\[//;s/\]$//" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^"//;s/"$//' | jq -R . 2>/dev/null | jq -s . 2>/dev/null || echo "[]")
-                
+
                 # Parse languages (optional, empty means applies to all)
                 local languages=$(echo "$frontmatter" | grep -E "^languages:" | sed 's/^languages:[[:space:]]*//' | sed "s/^\[//;s/\]$//" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^"//;s/"$//' | jq -R . 2>/dev/null | jq -s . 2>/dev/null || echo "[]")
-                
+
                 # Parse applies_to (optional, empty means applies to everything)
                 local applies_to=$(echo "$frontmatter" | grep -E "^applies_to:" | sed 's/^applies_to:[[:space:]]*//' | sed "s/^\[//;s/\]$//" | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^"//;s/"$//' | jq -R . 2>/dev/null | jq -s . 2>/dev/null || echo "[]")
-                
+
                 # Build JSON entry (only if description exists)
                 if [[ -n "$description" ]]; then
                     local entry=$(jq -n \
@@ -422,7 +436,7 @@ wiz_load_context_metadata() {
                             languages: $langs,
                             applies_to: $applies
                         }' 2>/dev/null)
-                    
+
                     if [[ -n "$entry" ]]; then
                         metadata_json=$(echo "$metadata_json" | jq --argjson entry "$entry" '. += [$entry]' 2>/dev/null || echo "$metadata_json")
                     fi
@@ -430,7 +444,7 @@ wiz_load_context_metadata() {
             fi
         fi
     done < <(find "$context_dir" -type f -name "*.md" -print0 2>/dev/null | sort -z)
-    
+
     echo "$metadata_json"
 }
 
@@ -438,12 +452,12 @@ wiz_load_context_metadata() {
 wiz_load_context_file() {
     local context_file="$1"
     local full_path=".wiz/context/$context_file"
-    
+
     if [[ ! -f "$full_path" ]]; then
         echo ""
         return 1
     fi
-    
+
     # Return file content (skip frontmatter - everything after second ---)
     awk '/^---$/{count++; if(count==2) flag=1; next} flag' "$full_path"
 }
@@ -960,7 +974,6 @@ if [[ -f "$RESUME_STATE_FILE" ]]; then
 fi
 ```
 
-
 ### Step 3: Load Local Context Metadata (Once Before Loop)
 
 **⚠️ Load context metadata ONCE before the loop - reuse inside loop.**
@@ -1046,7 +1059,7 @@ while true; do
             fi
         done
     fi
-    
+
     # Context metadata is available from Step 3 (loaded before loop and exported)
 
     # Create resume state
@@ -1087,6 +1100,7 @@ done
 #### 5.1: Analyze Milestone
 
 From `$MILESTONE_SECTION`, understand:
+
 - Goal of the milestone
 - Acceptance criteria to satisfy
 - Files mentioned (detect language from extensions)
@@ -1094,6 +1108,7 @@ From `$MILESTONE_SECTION`, understand:
 #### 5.2: Detect Language
 
 From file paths in milestone:
+
 - `.go` → Go project
 - `.ts`, `.tsx`, `.js`, `.jsx` → TypeScript/JavaScript
 - `.py` → Python
@@ -1103,15 +1118,17 @@ From file paths in milestone:
 #### 5.3: (Optional) Consult Specialist
 
 **You can consult specialists when you need help with:**
+
 - ✅ **Figuring out the right coding strategy** for the milestone
 - ✅ **Determining test commands** for the project's language/stack
-- ✅ **Understanding assertion patterns** (e.g., for Go: should I use require.* methods?)
+- ✅ **Understanding assertion patterns** (e.g., for Go: should I use require.\* methods?)
 - ✅ Best practices unclear for the language
 - ✅ Complex patterns needed (concurrency, async, etc.)
 - ✅ Architecture decisions required
 - ✅ Testing strategies and frameworks to use
 
 **Only if you need guidance**, consult the language specialist by referencing the appropriate agent:
+
 - `.cursor/agents/wiz-go-specialist.md` for Go
 - `.cursor/agents/wiz-typescript-specialist.md` for TypeScript
 - `.cursor/agents/wiz-python-specialist.md` for Python
@@ -1124,14 +1141,17 @@ Specialist provides guidance (not implementation). You use advice to implement.
 #### 5.4: Write Code Using Your Tools
 
 **Use Write tool for new files:**
+
 - Create new files with the Write tool
 - Provide complete file content
 
 **Use Edit tool for modifications:**
+
 - Edit existing files with the Edit tool
 - Provide old_string and new_string for replacements
 
 **Use Bash tool for file operations:**
+
 - Create directories, run commands, etc.
 
 #### 5.5: Run Tests and Linters
@@ -1139,6 +1159,7 @@ Specialist provides guidance (not implementation). You use advice to implement.
 **If you're unsure about test commands for the project's language/stack, consult the specialist first (see Step 5.3).**
 
 **For Go:**
+
 ```bash
 go test ./... -v          # All tests must pass
 golangci-lint run         # Zero errors
@@ -1147,6 +1168,7 @@ go vet ./...              # Vet
 ```
 
 **For TypeScript:**
+
 ```bash
 npm test                  # All tests must pass
 eslint src/**/*.ts        # Zero errors
@@ -1154,6 +1176,7 @@ prettier --write "src/**"  # Format
 ```
 
 **For Python:**
+
 ```bash
 pytest                    # All tests must pass
 flake8 .                  # Zero errors
@@ -1162,6 +1185,13 @@ mypy .                    # Type check
 ```
 
 **CRITICAL**: Fix any failures before proceeding. If tests or linters fail and you're unsure how to fix them, consult the language specialist for guidance.
+
+**🚨 LINT ERROR POLICY 🚨**:
+
+- **ALWAYS fix lint errors** - Do NOT add lint ignores (e.g., `// eslint-disable`, `# noqa`, `# pylint: disable`) unless it is genuinely not feasible to fix the error
+- If you encounter a lint error, first attempt to fix it properly
+- Only add lint ignores as a last resort when fixing would require significant architectural changes or when the lint rule is incorrect for the specific use case
+- When adding a lint ignore, include a comment explaining why it's necessary
 
 #### 5.6: Validate Acceptance Criteria
 
@@ -1202,14 +1232,16 @@ Before creating the commit, the language specialist MUST review all changes to c
 **⚠️ CRITICAL: You MUST send the COMPLETE diff to the specialist.**
 
 The specialist review is **worthless** if you only send partial files. Common mistakes:
+
 - ❌ Only sending source files (writer.go) but not tests (writer_test.go)
 - ❌ Only sending "main" files and skipping related files
 - ❌ Filtering out test files, config files, or markdown files
 - ❌ Truncating the diff because it's "too large"
 
 **CORRECT approach - Include ALL code:**
+
 - ✅ Include ALL source files (.go, .ts, .py, .cs, .java, etc.)
-- ✅ Include ALL test files (*_test.go, *.test.ts, test_*.py, etc.)
+- ✅ Include ALL test files (_\_test.go, _.test.ts, test\_\*.py, etc.)
 - ✅ Include ALL config files (.toml, .yaml, .env, etc.)
 - ✅ Include ALL documentation files (.md, .txt, etc.)
 - ❌ Exclude binary files (executables, images, .so, .dll, etc.)
@@ -1270,6 +1302,7 @@ If you detected multiple specialists (e.g., Go, Python, and Docker), you MUST in
 **⚠️ REMINDER: Send the ENTIRE CHANGES_DIFF variable to EACH specialist - all code files.**
 
 Do NOT:
+
 - Filter which source/test files to include
 - Select only certain code file types
 - Omit test files or config files
@@ -1279,6 +1312,7 @@ Do NOT:
 Each specialist MUST see ALL code changes to catch issues in their domain.
 
 When you need to consult specialists, reference the appropriate agent files:
+
 - For Go: `.cursor/agents/wiz-go-specialist.md`
 - For TypeScript: `.cursor/agents/wiz-typescript-specialist.md`
 - For Python: `.cursor/agents/wiz-python-specialist.md`
@@ -1346,6 +1380,13 @@ After ALL specialists respond, aggregate their reviews:
 
 **CRITICAL**: Create a proper commit WITHOUT skipping hooks, but skip GPG signing to avoid signing issues.
 
+**🚨 ABSOLUTE PROHIBITION 🚨**:
+
+- **NEVER use `git commit --no-verify`** - This is COMPLETELY FORBIDDEN
+- The pre-commit hook at `scripts/pre-commit.sh` MUST run before every commit
+- If the pre-commit hook fails, you MUST fix the issues (tests, linters) before committing
+- Skipping hooks defeats the purpose of quality gates and is strictly prohibited
+
 After specialist approval:
 
 ```bash
@@ -1361,7 +1402,8 @@ Co-Authored-By: Wiz <wiz@flutterbrazil.com>"
 
 # IMPORTANT:
 # - YES to --no-gpg-sign (avoid GPG signing issues)
-# - NO to --no-verify (let hooks run for quality checks)
+# - NO to --no-verify (let hooks run for quality checks - THIS IS MANDATORY)
+# - The pre-commit hook at scripts/pre-commit.sh will run automatically
 git commit --no-gpg-sign -m "$COMMIT_MSG"
 
 COMMIT_HASH=$(git rev-parse --short HEAD)
@@ -1381,6 +1423,7 @@ MILESTONES_COMPLETED=$((MILESTONES_COMPLETED + 1))
 **This is where the intelligent gating happens.**
 
 **IMPORTANT**: This step only executes AFTER:
+
 - Milestone is fully implemented and tested
 - Status updated to COMPLETE
 - Commit created successfully (with hooks running)
@@ -1535,6 +1578,7 @@ fi
 **What happens after Step 10 when analyst says PROCEED:**
 
 The `continue` statement in the bash if block causes the loop to IMMEDIATELY jump back to Step 4 (the top of the `while true` loop). This means:
+
 1. Find next milestone (Step 4)
 2. If found → Execute it (Step 5)
 3. Specialist reviews diff (Step 7)
@@ -1544,11 +1588,13 @@ The `continue` statement in the bash if block causes the loop to IMMEDIATELY jum
 7. Repeat until HALT or no more milestones
 
 **🚨 CRITICAL: The loop ONLY stops when 🚨**
+
 1. **No more milestones found** (Step 4) → Celebrate with 🎉 message
 2. **Analyst recommends HALT** (Step 10) → Present questions and exit
 3. **Error occurs** → Exit with error message
 
 **❌ NEVER STOP FOR THESE REASONS:**
+
 - "Completed 2 milestones" - NOT a stop condition
 - "Completed 3 milestones" - NOT a stop condition
 - "Completed 5 milestones" - NOT a stop condition
@@ -1580,6 +1626,7 @@ After completing milestone N and analyst says PROCEED → Go to Step 4 and start
 ### Milestone-Analyst Integration
 
 The analyst acts as a **gatekeeper** between milestones. Its purpose is to:
+
 - Prevent execution of ambiguous requirements
 - Flag decisions that need human judgment
 - Identify milestones that might be complete
@@ -1588,6 +1635,7 @@ The analyst acts as a **gatekeeper** between milestones. Its purpose is to:
 ### Loop Safety
 
 The loop is designed to be **safe and resumable**:
+
 - Resume state created before each milestone
 - Commits created after each milestone
 - Analyst analysis happens after completion
@@ -1720,6 +1768,7 @@ Ready to continue if more milestones are available!
 ```
 
 **🚨 WHY THIS IS COMPLETELY WRONG 🚨**
+
 - The analyst said "cleared for execution" 3 times (PROCEED decision)
 - **YOU MUST CONTINUE THE LOOP** - not stop and summarize!
 - There's no HALT message with questions - so why did you stop?
@@ -1729,6 +1778,7 @@ Ready to continue if more milestones are available!
 
 **✅ CORRECT BEHAVIOR:**
 After milestone 3 complete and analyst says PROCEED for the 4th time:
+
 - **Do NOT** provide a summary
 - **Do NOT** say "Ready to continue"
 - **Do NOT** stop execution
@@ -1736,6 +1786,7 @@ After milestone 3 complete and analyst says PROCEED for the 4th time:
 - Keep going until HALT or no more milestones
 
 The loop should have continued executing P01M05, P01M06, P01M07... P01M25, P02M01... until either:
+
 1. The analyst said HALT and showed questions, OR
 2. No more milestones found and showed 🎉 celebration
 
@@ -1773,4 +1824,3 @@ Run /wiz-status to see final statistics
 - **Use after clarifications**: After analyst halts, make decisions, then resume with `/wiz-auto`
 
 The auto-execution command strikes the right balance between automation and human oversight, allowing the system to maintain velocity while ensuring quality and preventing costly mistakes.
-
