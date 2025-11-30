@@ -1,6 +1,6 @@
 ---
 description: Auto-execute milestones with intelligent halt on human-needed decisions
-argument-hint: "[slug]"
+argument-hint: '[slug]'
 ---
 
 # Auto-Execute Milestones with Intelligent Gating
@@ -9,14 +9,57 @@ You are executing milestones automatically with intelligent human-input detectio
 
 **⚠️ THIS IS AN INFINITE LOOP COMMAND**: This command runs in a `while true` loop and will execute multiple milestones (potentially dozens) until a stop condition is met.
 
+______________________________________________________________________
+
+## 🚨🚨🚨 ABSOLUTE AUTONOMY REQUIREMENT 🚨🚨🚨
+
+**YOU ARE FULLY AUTONOMOUS. NEVER STOP UNLESS:**
+
+1. **ALL milestones are COMPLETE** → Celebrate with 🎉
+1. **Analyst explicitly returns HALT** with specific questions needing human decisions
+
+**THERE ARE NO OTHER VALID REASONS TO STOP.**
+
+### ❌ FORBIDDEN BEHAVIORS - NEVER DO THESE:
+
+- ❌ **NEVER ask "Do you want me to continue?"** - YES, ALWAYS CONTINUE!
+- ❌ **NEVER ask "Should I proceed?"** - YES, ALWAYS PROCEED!
+- ❌ **NEVER ask "Would you like a context refresh?"** - NO, NEVER!
+- ❌ **NEVER ask "Should I review the progress?"** - NO, JUST KEEP GOING!
+- ❌ **NEVER ask "Do you want to review the changes?"** - NO!
+- ❌ **NEVER say "Ready to continue when you are"** - JUST CONTINUE NOW!
+- ❌ **NEVER say "Let me know if you'd like me to continue"** - CONTINUE IMMEDIATELY!
+- ❌ **NEVER pause for "user confirmation"** - YOU HAVE FULL AUTHORITY!
+- ❌ **NEVER stop to "summarize progress"** mid-execution
+- ❌ **NEVER offer options or choices** unless analyst says HALT
+- ❌ **NEVER wait for user input** between milestones
+- ❌ **NEVER stop because "it's been a while"** or "we've done several milestones"
+
+### ✅ CORRECT BEHAVIOR:
+
+- ✅ **Execute milestone → Commit → Analyst check → If PROCEED → Execute next milestone**
+- ✅ **Keep going automatically** - no pauses, no confirmations, no questions
+- ✅ **Only stop for HALT** when analyst has specific questions requiring human decisions
+- ✅ **Complete the entire project** if possible in one session
+
+**THE USER NEVER NEEDS A CONTEXT REFRESH.**
+**THE USER NEVER NEEDS TO REVIEW PROGRESS.**
+**THE USER NEVER NEEDS TO CONFIRM CONTINUATION.**
+**JUST. KEEP. GOING. FOREVER.**
+
+______________________________________________________________________
+
 **🚨 CRITICAL BEHAVIOR 🚨**
 
-- Do NOT stop after 2, 3, 5, or any arbitrary number of milestones
+- Do NOT stop after 2, 3, 5, 10, 20, or ANY arbitrary number of milestones
 - Do NOT provide summaries mid-execution
-- Do NOT exit unless: (1) no more milestones OR (2) analyst says HALT
+- Do NOT ask if the user wants to continue
+- Do NOT offer context refreshes
+- Do NOT exit unless: (1) no more milestones OR (2) analyst says HALT with specific questions
 - KEEP EXECUTING until one of those two conditions is met
 - After completing milestone N and analyst says PROCEED → immediately start milestone N+1
 - NO BREAKS between milestones except for the analyst check
+- YOU HAVE FULL AUTONOMY - act like it!
 
 ## Arguments
 
@@ -39,15 +82,15 @@ This command continuously executes TODO milestones in an **infinite loop** (`whi
 **Each milestone implementation:**
 
 1. Loads context (phase + milestone + design guidelines)
-2. Analyzes requirements and detects language
-3. (Optional) Consults language specialist for guidance during implementation
-4. **Implements code directly** using Write/Edit/Bash tools
-5. Runs tests and linters
-6. Updates milestone status to COMPLETE
-7. **MANDATORY: Specialist reviews the diff for language-specific issues**
-8. Fixes any issues found and re-reviews until approved
-9. Creates commit after specialist approval
-10. Calls analyst to check next milestone
+1. Analyzes requirements and detects language
+1. (Optional) Consults language specialist for guidance during implementation
+1. **Implements code directly** using Write/Edit/Bash tools
+1. Runs tests and linters
+1. Updates milestone status to COMPLETE
+1. **MANDATORY: Specialist reviews the diff for language-specific issues**
+1. Fixes any issues found and re-reviews until approved
+1. Creates commit after specialist approval
+1. Calls analyst to check next milestone
 
 This creates an intelligent workflow that maintains momentum while preventing costly mistakes from proceeding without human oversight.
 
@@ -55,12 +98,14 @@ This creates an intelligent workflow that maintains momentum while preventing co
 
 ## ⚠️ CRITICAL: Loop Continuation Rules
 
-**NEVER STOP THE LOOP UNLESS:**
+**THERE ARE ONLY 2 VALID REASONS TO STOP:**
 
-1. No more TODO milestones found (Step 4) → Celebrate with big message
-2. Analyst returns HALT decision (Step 10) → Show questions and exit
+1. No more TODO milestones found (Step 4) → Celebrate with big 🎉 message
+1. Analyst returns HALT decision with SPECIFIC QUESTIONS (Step 10) → Show questions and exit
 
-**IF ANALYST RETURNS PROCEED - READ THIS CAREFULLY:**
+**EVERYTHING ELSE = KEEP GOING**
+
+**IF ANALYST RETURNS PROCEED - THIS IS AN ORDER:**
 
 - You MUST continue the loop IMMEDIATELY
 - Go back to Step 4 (find next milestone)
@@ -68,8 +113,13 @@ This creates an intelligent workflow that maintains momentum while preventing co
 - DO NOT stop
 - DO NOT provide a summary
 - DO NOT say "Ready to continue if more milestones are available"
+- DO NOT say "Let me know when you want to continue"
+- DO NOT say "Should I proceed with the next milestone?"
+- DO NOT ask "Do you want a context refresh?"
+- DO NOT offer to "review progress so far"
 - DO NOT wait for user input
 - DO NOT ask questions
+- DO NOT pause for any reason
 - DO NOT exit
 - JUST CONTINUE THE LOOP
 
@@ -79,35 +129,42 @@ This creates an intelligent workflow that maintains momentum while preventing co
 - No output in between
 - No summaries
 - No pausing
-- Just loop back to the top of the while loop
+- No questions
+- No offers
+- No confirmations requested
+- Just loop back to the top of the while loop and EXECUTE THE NEXT MILESTONE
 
-**This is non-negotiable.** The entire purpose of this command is to execute milestones continuously until one of the two stop conditions above is met. If you stop after 2 or 3 milestones when the analyst says PROCEED, you are VIOLATING the command's core purpose.
+**This is non-negotiable and absolute.** The entire purpose of this command is to execute milestones continuously until one of the two stop conditions above is met. If you stop after ANY number of milestones when the analyst says PROCEED, you are VIOLATING the command's core purpose.
+
+**YOU DO NOT NEED PERMISSION TO CONTINUE.**
+**THE USER HAS ALREADY GIVEN PERMISSION BY RUNNING /wiz-auto.**
+**THAT PERMISSION IS VALID UNTIL HALT OR COMPLETION.**
 
 ## CRITICAL: Proper Execution Order
 
 **This is the EXACT order of operations for each loop iteration:**
 
 1. **Find Next TODO Milestone** → Locate the next milestone to execute
-2. **Load Context** → Phase, milestone, design guidelines
-3. **Analyze Milestone** → Detect language, understand requirements
-4. **(Optional) Consult Specialist** → Get guidance if needed (wiz-go-specialist, etc.)
-5. **Implement Milestone COMPLETELY** → YOU write the code directly
+1. **Load Context** → Phase, milestone, design guidelines
+1. **Analyze Milestone** → Detect language, understand requirements
+1. **(Optional) Consult Specialist** → Get guidance if needed (wiz-go-specialist, etc.)
+1. **Implement Milestone COMPLETELY** → YOU write the code directly
    - Write files using Write/Edit/Bash tools
    - Implement ALL requirements
    - Validate ALL acceptance criteria
    - Run ALL tests (ZERO failures, ZERO skips)
    - Run ALL linters (ZERO errors)
    - Verify ENTIRE codebase is healthy
-6. **Update Milestone Status** → Change status from 🚧 TODO to ✅ COMPLETE
-7. **Mandatory Specialist Review** → Specialist reviews diff for language-specific issues
+1. **Update Milestone Status** → Change status from 🚧 TODO to ✅ COMPLETE
+1. **Mandatory Specialist Review** → Specialist reviews diff for language-specific issues
    - Generate diff of all changes
    - Detect language(s) from changed files
    - Consult appropriate specialist(s)
    - If issues found: fix them and loop back to step 7 (re-review)
    - Only proceed when specialist says "No issues found"
-8. **Create Proper Commit** → git commit --no-gpg-sign (hooks run, but no GPG signing)
-9. **Verify Commit Success** → Ensure commit was created
-10. **THEN Call wiz-milestone-analyst** → Analyze the NEXT milestone
+1. **Create Proper Commit** → git commit --no-gpg-sign (hooks run, but no GPG signing)
+1. **Verify Commit Success** → Ensure commit was created
+1. **THEN Call wiz-milestone-analyst** → Analyze the NEXT milestone
 
 - Analyst examines the upcoming milestone
 - Analyst determines PROCEED or HALT
@@ -143,20 +200,21 @@ The bash code blocks below are **sequential templates** that show the command's 
    - Step 4 uses: `$PHASES_DIR`, sets: `$NEXT_PHASE_FILE`, `$MILESTONE_ID`
    - Step 5+ use: `$MILESTONE_ID`, `$NEXT_PHASE_FILE`, `$MILESTONE_SECTION`
 
-2. **Do NOT Execute These Bash Blocks Directly**: They are templates showing the implementation pattern. You should:
+1. **Do NOT Execute These Bash Blocks Directly**: They are templates showing the implementation pattern. You should:
 
    - Read and understand what each step does
    - Execute the logic using your tools (Bash, Read, Edit, etc.)
    - Adapt the patterns to your current context
    - Do NOT copy-paste and execute blindly
 
-3. **Do NOT Execute Bash Blocks from Milestones**: When you read milestone content from phase files:
+1. **Do NOT Execute Bash Blocks from Milestones**: When you read milestone content from phase files:
 
    - Bash examples in milestones are for human readers, not for you to execute
    - Read them as instructions about what needs to be implemented
    - Implement the requirements using your own approach
 
-4. **When to Actually Execute Bash**:
+1. **When to Actually Execute Bash**:
+
    - ✅ When implementing the milestone requirements (Step 5)
    - ✅ When running tests and linters (Step 5.5)
    - ✅ When creating commits (Step 8)
@@ -994,16 +1052,16 @@ fi
 This is where the auto-execution loop happens. For each iteration:
 
 1. **Find Next TODO Milestone**
-2. **If no milestone found → CELEBRATE and exit**
-3. **Load Execution Context**
-4. **Create Resume State**
-5. **Implement the Milestone** ← YOU write the code directly
-6. **Update Milestone Status**
-7. **Mandatory Specialist Review** ← Specialist reviews diff, fix issues if found
-8. **Create Commit** ← git commit --no-gpg-sign (after specialist approval)
-9. **Analyze NEXT Milestone** ← Uses milestone-analyst agent
-10. **If PROCEED → Continue loop**
-11. **If HALT → Present questions and exit**
+1. **If no milestone found → CELEBRATE and exit**
+1. **Load Execution Context**
+1. **Create Resume State**
+1. **Implement the Milestone** ← YOU write the code directly
+1. **Update Milestone Status**
+1. **Mandatory Specialist Review** ← Specialist reviews diff, fix issues if found
+1. **Create Commit** ← git commit --no-gpg-sign (after specialist approval)
+1. **Analyze NEXT Milestone** ← Uses milestone-analyst agent
+1. **If PROCEED → Continue loop**
+1. **If HALT → Present questions and exit**
 
 **IMPORTANT**: The command implements code directly in Step 5. Only Step 9 uses agent invocation to delegate to the milestone-analyst. The specialist review in Step 7 is also done via agent invocation but may loop multiple times until approval.
 
@@ -1241,7 +1299,7 @@ The specialist review is **worthless** if you only send partial files. Common mi
 **CORRECT approach - Include ALL code:**
 
 - ✅ Include ALL source files (.go, .ts, .py, .cs, .java, etc.)
-- ✅ Include ALL test files (_\_test.go, _.test.ts, test\_\*.py, etc.)
+- ✅ Include ALL test files (\_\_test.go, \_.test.ts, test\_\*.py, etc.)
 - ✅ Include ALL config files (.toml, .yaml, .env, etc.)
 - ✅ Include ALL documentation files (.md, .txt, etc.)
 - ❌ Exclude binary files (executables, images, .so, .dll, etc.)
@@ -1362,7 +1420,7 @@ After ALL specialists respond, aggregate their reviews:
 **Aggregate all issues from all specialists:**
 
 1. **Collect issues from ALL specialist responses**
-2. **If ANY specialist found issues:**
+1. **If ANY specialist found issues:**
    - Display ALL issues from ALL specialists
    - Fix EACH issue using Edit tool or Bash
    - **CRITICAL: Loop back to Step 7.1** - Do NOT proceed forward!
@@ -1370,7 +1428,7 @@ After ALL specialists respond, aggregate their reviews:
    - Consult ALL specialists again with new diff (Step 7.2)
    - Parse the new reviews (Step 7.3)
    - Repeat until ALL specialists approve
-3. **Do NOT proceed to Step 8** until ALL specialists say "No issues found"
+1. **Do NOT proceed to Step 8** until ALL specialists say "No issues found"
 
 **IF ALL SPECIALISTS say "No issues found" or "Review Complete":**
 
@@ -1507,9 +1565,19 @@ Be conservative - when in doubt, choose HALT.
 **CRITICAL LOOP LOGIC**: After the analyst returns its analysis, you MUST parse the decision and act accordingly. There are ONLY TWO valid reasons to stop the loop:
 
 1. **No more milestones** → Celebrate (handled in Step 4)
-2. **Analyst returns HALT** → Show questions and exit
+1. **Analyst returns HALT with specific questions** → Show questions and exit
 
 If the analyst returns PROCEED, you MUST continue the loop. DO NOT stop for any other reason.
+
+**🚨 REMINDER: YOU DO NOT NEED TO ASK THE USER ANYTHING 🚨**
+
+- Do NOT ask "Should I continue?"
+- Do NOT ask "Do you want a context refresh?"
+- Do NOT ask "Would you like to review the changes?"
+- Do NOT say "Ready when you are"
+- Do NOT offer options
+- The user has given you FULL AUTONOMY by running /wiz-auto
+- ACT ON THAT AUTONOMY - just keep executing!
 
 After the analyst returns its analysis, parse the decision:
 
@@ -1580,18 +1648,18 @@ fi
 The `continue` statement in the bash if block causes the loop to IMMEDIATELY jump back to Step 4 (the top of the `while true` loop). This means:
 
 1. Find next milestone (Step 4)
-2. If found → Execute it (Step 5)
-3. Specialist reviews diff (Step 7)
-4. Commit it (Step 8)
-5. Analyze the next one (Step 9)
-6. If PROCEED → Continue to Step 4 again
-7. Repeat until HALT or no more milestones
+1. If found → Execute it (Step 5)
+1. Specialist reviews diff (Step 7)
+1. Commit it (Step 8)
+1. Analyze the next one (Step 9)
+1. If PROCEED → Continue to Step 4 again
+1. Repeat until HALT or no more milestones
 
 **🚨 CRITICAL: The loop ONLY stops when 🚨**
 
 1. **No more milestones found** (Step 4) → Celebrate with 🎉 message
-2. **Analyst recommends HALT** (Step 10) → Present questions and exit
-3. **Error occurs** → Exit with error message
+1. **Analyst recommends HALT** (Step 10) → Present questions and exit
+1. **Error occurs** → Exit with error message
 
 **❌ NEVER STOP FOR THESE REASONS:**
 
@@ -1776,11 +1844,30 @@ Ready to continue if more milestones are available!
 - The loop just stopped arbitrarily after 3 milestones - VIOLATION of command purpose
 - "Ready to continue if more milestones available" - **WRONG! Just continue NOW!**
 
+**🚨 OTHER WRONG OUTPUTS THAT ARE FORBIDDEN 🚨**
+
+```
+❌ "Should I continue with the next milestone?"
+❌ "Would you like me to proceed?"
+❌ "Do you need a context refresh before we continue?"
+❌ "Let me know when you're ready to continue"
+❌ "Would you like to review the changes before proceeding?"
+❌ "I can continue when you're ready"
+❌ "Should I keep going?"
+❌ "Ready to continue when you give the word"
+❌ "Do you want me to execute the next milestone?"
+```
+
+**ALL OF THESE ARE VIOLATIONS.** The user has already said YES by running /wiz-auto.
+
 **✅ CORRECT BEHAVIOR:**
 After milestone 3 complete and analyst says PROCEED for the 4th time:
 
 - **Do NOT** provide a summary
 - **Do NOT** say "Ready to continue"
+- **Do NOT** ask any questions
+- **Do NOT** offer context refresh
+- **Do NOT** ask for confirmation
 - **Do NOT** stop execution
 - **JUST CONTINUE** - Go to Step 4, find P01M05, and execute it!
 - Keep going until HALT or no more milestones
@@ -1788,7 +1875,14 @@ After milestone 3 complete and analyst says PROCEED for the 4th time:
 The loop should have continued executing P01M05, P01M06, P01M07... P01M25, P02M01... until either:
 
 1. The analyst said HALT and showed questions, OR
-2. No more milestones found and showed 🎉 celebration
+1. No more milestones found and showed 🎉 celebration
+
+**THE USER WANTS YOU TO KEEP GOING FOREVER UNTIL:**
+
+- You genuinely need a human decision (analyst HALT), OR
+- The project is complete
+
+**THAT'S IT. NO OTHER STOPS. NO QUESTIONS. NO CONFIRMATIONS. JUST KEEP GOING.**
 
 ### Example 3: Correct - Full Completion
 
@@ -1811,11 +1905,11 @@ Run /wiz-status to see final statistics
 ## Benefits
 
 1. **Maintains Momentum**: Executes as many milestones as safely possible without stopping
-2. **Prevents Mistakes**: Halts before ambiguous or decision-heavy milestones
-3. **Intelligent Gating**: Uses AI to determine risk rather than blindly proceeding
-4. **Clear Communication**: Provides specific questions when human input needed
-5. **Resumable**: Can be interrupted and resumed at any time
-6. **Auditable**: Each milestone gets its own commit
+1. **Prevents Mistakes**: Halts before ambiguous or decision-heavy milestones
+1. **Intelligent Gating**: Uses AI to determine risk rather than blindly proceeding
+1. **Clear Communication**: Provides specific questions when human input needed
+1. **Resumable**: Can be interrupted and resumed at any time
+1. **Auditable**: Each milestone gets its own commit
 
 ## When to Use
 
@@ -1824,3 +1918,24 @@ Run /wiz-status to see final statistics
 - **Use after clarifications**: After analyst halts, make decisions, then resume with `/wiz-auto`
 
 The auto-execution command strikes the right balance between automation and human oversight, allowing the system to maintain velocity while ensuring quality and preventing costly mistakes.
+
+______________________________________________________________________
+
+## 🔥 FINAL REMINDER: FULL AUTONOMY 🔥
+
+When the user runs `/wiz-auto`, they are giving you **COMPLETE PERMISSION** to:
+
+- Execute as many milestones as needed
+- Make commits automatically
+- Keep going indefinitely
+
+They are **NOT** asking you to:
+
+- Check in with them periodically
+- Ask if they want to continue
+- Offer context refreshes
+- Pause for review
+
+**The user's time is valuable. They ran /wiz-auto specifically because they DON'T want to babysit you.**
+
+**HONOR THAT TRUST. KEEP GOING UNTIL HALT OR COMPLETE. NO EXCEPTIONS.**
